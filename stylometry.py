@@ -66,7 +66,7 @@ def sentence_length_spread(text: str) -> float:
 
     My choice: the coefficient of variation (stdev / mean) of sentence lengths
     in words. 0.0 means every sentence is the same length; human prose usually
-    sits around 0.5–0.8, generated prose nearer 0.2–0.4. **Higher = more
+    sits around 0.5–0.8, generated prose nearer 0.15–0.35. **Higher = more
     human.** Fewer than two sentences returns 0.0, and `style_signal` treats
     that as "no evidence" rather than "perfectly even" so a one-sentence
     submission isn't pushed toward AI.
@@ -170,12 +170,14 @@ def style_signal(text: str) -> float:
          human" anchor, then clamped, so each contributes on the same scale:
 
              spread       0.20 -> 1.0 (AI)   0.70 -> 0.0 (human)
-             vocabulary   0.68 -> 1.0        0.82 -> 0.0
+             vocabulary   0.72 -> 1.0        0.92 -> 0.0
              punctuation  0.04 -> 1.0        0.14 -> 0.0
 
-      3. Weights 0.45 spread, 0.35 vocabulary, 0.20 punctuation. Spread is
-         the measure the AI/human difference shows up in most reliably;
-         punctuation is the noisiest (see its docstring).
+      3. Weights 0.55 spread, 0.25 vocabulary, 0.20 punctuation. Spread is
+         the measure that separated my calibration inputs most reliably.
+         Vocabulary did not: polished AI text scored *more* varied than a
+         plainly-written human paragraph, so it mostly measures plainness and
+         is weighted down. Punctuation is the noisiest (see its docstring).
       4. Short text is pulled toward 0.5. Below about 150 words these measures
          are mostly noise, and noise should read as "unsure", not as a verdict.
          Fewer than two sentences drops the spread measure entirely.
@@ -189,11 +191,11 @@ def style_signal(text: str) -> float:
         return 0.5
 
     parts = [
-        (0.35, flip(type_token_ratio(text), 0.68, 0.82)),
+        (0.25, flip(type_token_ratio(text), 0.72, 0.92)),
         (0.20, flip(punctuation_density(text), 0.04, 0.14)),
     ]
     if len(sentences(text)) >= 2:
-        parts.append((0.45, flip(sentence_length_spread(text), 0.20, 0.70)))
+        parts.append((0.55, flip(sentence_length_spread(text), 0.20, 0.70)))
 
     raw = sum(w * v for w, v in parts) / sum(w for w, _ in parts)
 

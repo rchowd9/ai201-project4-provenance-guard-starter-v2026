@@ -97,13 +97,19 @@ model and no understanding of the words. It combines three measures:
 
 - *Sentence-length spread:* the standard deviation of sentence lengths divided
   by the mean. Do sentences vary in length, or are they all about the same?
-- *Type-token ratio:* unique words divided by total words. How much does the
-  vocabulary repeat?
-- *Punctuation density:* how much punctuation there is per word and how varied
-  it is, with semicolons, dashes and parentheses weighted above full stops.
+- *Type-token ratio:* unique words divided by total words, averaged over a
+  sliding 50-word window so long and short texts are comparable. How much does
+  the vocabulary repeat?
+- *Punctuation density:* weighted punctuation marks per word. Full stops and
+  commas count half, and semicolons, colons, dashes, brackets, quotation marks,
+  ! and ? count one.
 
-Low spread, low variety and plain, uniform punctuation push the score towards 1,
-which means "more likely AI". This is the same direction as signal one.
+Each measure is flipped and mapped onto 0–1 between a "clearly AI" anchor and a
+"clearly human" anchor. They are then weighted 0.55 spread, 0.25 vocabulary and
+0.20 punctuation. Under 150 words, the score is pulled towards 0.5 in proportion
+to the length, because a short text is mostly noise on these measures. Low
+spread, low variety and plain punctuation push the score towards 1, which means
+"more likely AI". This is the same direction as signal one.
 
 **Why that might differ between human and AI writing:** Choosing the most likely
 next word, averaged over a whole passage, tends to produce even, mid-length
@@ -130,9 +136,12 @@ changes are cheap to make on purpose:
   following a five-paragraph template, reads as machine-shaped. This
   is the same group of writers signal one already over-accuses, so when the two
   signals agree on them, the agreement isn't independent evidence.
-- **Length distorts it.** The type-token ratio falls as text gets longer simply
-  because common words repeat, so a long human essay can look less varied than
-  a short AI paragraph.
+- **The vocabulary measure rewards polish, not people.** The 50-word window
+  removes the length effect, but in calibration a polished AI paragraph scored
+  *more* varied (0.91) than a plainly written human one (0.74). What it really
+  detects is plainness, which is why it carries only 0.25 of the weight.
+- **Recent chat models like em dashes.** The punctuation measure counts dashes
+  as a human habit, so it can read modern AI output as more human.
 - **The text has to look like prose.** The splitter only breaks on `.`, `!` or
   `?` followed by a space, so a one-sentence submission, a list, a poem, text
   with no full stops, or text full of abbreviations ("Dr.", "e.g.") gives a
