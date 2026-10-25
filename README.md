@@ -53,19 +53,91 @@
 
 ### Signal one — the model signal
 
-**What it measures:**
+**What it measures:** How predictable the text is to a language model.
+`detector.py` runs gpt2 locally over the first 400 tokens and takes the
+perplexity, which is how surprised the model is on average by each next token.
+It maps that onto 0–1 with a logistic curve centred on perplexity 45. Low
+perplexity gives a high score, and a high score means "more likely AI".
 
-**Why that might differ between human and AI writing:**
+**Why that might differ between human and AI writing:** A language model writes
+by picking a likely next word again and again, so its output sits in the
+high-probability region that another language model also finds easy to predict.
+Human writers make choices that aren't the statistically typical continuation:
+a specific name instead of a general noun, an odd word, a sudden turn. Those
+choices raise perplexity.
 
-**What it can't see:**
+**What it can't see:** Who wrote the text. It sees only how *ordinary* the
+wording is, and ordinary is not the same as machine-made. Specifically:
+
+- **Plain human writing looks like AI.** Someone writing in a second language
+  and sticking to words they're sure of, a younger writer, or anyone writing
+  simply on purpose produces common words in short sentences. gpt2 finds that
+  as predictable as generated text. These are the false accusations that hurt
+  the most, and the people they hit have the least room to argue back.
+- **Unusual-sounding AI looks human.** AI text generated at a high temperature,
+  prompted to use rare or ornate vocabulary, run through a synonym-swapping
+  paraphraser, or sprinkled with typos and slang becomes less predictable and
+  scores as human. Dense, formal prose full of rare words scores human whoever
+  wrote it.
+- **Famous text looks like AI.** gpt2 saw well-known passages (song lyrics,
+  scripture, the Declaration of Independence, widely copied boilerplate) during
+  training, so it can predict them almost word for word. Human text that the
+  model has memorised therefore gets very low perplexity.
+- **It only reads the first 400 tokens.** Anything after the truncation point
+  has no effect on the score, so a human-written opening followed by AI text,
+  or the reverse, is judged entirely on the opening.
+- **Short text isn't enough evidence.** A few sentences give a noisy average,
+  and perplexity also moves with topic and length. A 2-sentence note and a
+  400-token essay are being placed on the same curve.
 
 ### Signal two — the style signal
 
-**What it measures:**
+**What it measures:** The shape of the text as a sequence of characters, with no
+model and no understanding of the words. It combines three measures:
 
-**Why that might differ between human and AI writing:**
+- *Sentence-length spread:* the standard deviation of sentence lengths divided
+  by the mean. Do sentences vary in length, or are they all about the same?
+- *Type-token ratio:* unique words divided by total words. How much does the
+  vocabulary repeat?
+- *Punctuation density:* how much punctuation there is per word and how varied
+  it is, with semicolons, dashes and parentheses weighted above full stops.
 
-**What it can't see:**
+Low spread, low variety and plain, uniform punctuation push the score towards 1,
+which means "more likely AI". This is the same direction as signal one.
+
+**Why that might differ between human and AI writing:** Choosing the most likely
+next word, averaged over a whole passage, tends to produce even, mid-length
+sentences, a safe and repeated vocabulary, and regular comma-and-full-stop
+punctuation. Human writing is lumpier. A three-word sentence sits next to a
+forty-word one, words get repeated for emphasis or avoided out of habit, and
+people have personal punctuation tics such as dashes, semicolons, ellipses or
+none at all.
+
+**What it can't see:** Meaning. It can't tell what the text says, so anything
+that changes the shape without changing the substance moves the score, and those
+changes are cheap to make on purpose:
+
+- **Surface edits launder AI text.** Adding typos creates new "unique" words and
+  raises the type-token ratio. Splitting some sentences and merging others
+  raises the spread. Adding dashes, semicolons or a pasted quotation raises the
+  punctuation score. None of these changes who wrote the text.
+- **Asking the model for a different style.** "Vary your sentence lengths, use
+  em dashes" is a one-line instruction to the generator, and it targets this
+  signal's features directly.
+- **Disciplined human writing looks like AI.** Plain, even, carefully edited
+  prose with uniform sentences and conventional punctuation, such as a
+  technical write-up, a non-native writer's careful English, or a student
+  following a five-paragraph template, reads as machine-shaped. This
+  is the same group of writers signal one already over-accuses, so when the two
+  signals agree on them, the agreement isn't independent evidence.
+- **Length distorts it.** The type-token ratio falls as text gets longer simply
+  because common words repeat, so a long human essay can look less varied than
+  a short AI paragraph.
+- **The text has to look like prose.** The splitter only breaks on `.`, `!` or
+  `?` followed by a space, so a one-sentence submission, a list, a poem, text
+  with no full stops, or text full of abbreviations ("Dr.", "e.g.") gives a
+  meaningless spread. The word pattern `[a-z0-9']+` drops accented letters, so
+  non-English or mixed-language text gets split into fragments.
 
 ### The combining rule
 
