@@ -42,63 +42,50 @@ Two things worth knowing before you pick numbers:
   a **miss**.
 
 ---
-## 1.
+## 1. False Positives
 
-<!-- Your criterion. It must name a number. -->
+Of 10 pieces of completely human-written text I submit, at most 1 is labeled with a high-confidence AI classification across all three evaluation trials.
 
-
-
-**Why this target:**
-
-
+**Why this target:** 
+False accusations carry a much higher social and professional penalty for a writer than a missed detection[cite: 3]. Setting the threshold at a maximum of 1 out of 10 ensures the detector remains trustworthy and protects human-authored content from false positives[cite: 3].
 
 ---
 
-## 2.
+## 2. Score Spread
 
-<!-- Your criterion. -->
+When testing clearly-AI generated text versus clearly-human text, the average confidence score difference between the two groups must be at least 0.50 points on a 0.0 to 1.0 scale.
 
-
-
-**Why this target:**
-
-
+**Why this target:** 
+A viable detection system needs a distinct separation between machine-generated and human-authored characteristics rather than clustering everything in an ambiguous middle ground.
 
 ---
 
-## 3.
+## 3. Label Coverage
 
-<!-- Your criterion. -->
+All three defined system labels (e.g., human, uncertain/mixed, and high-confidence AI) are successfully returned at least once across a test set of 15 diverse text samples.
 
-
-
-**Why this target:**
-
-
+**Why this target:** 
+If a label is mathematically or logically unreachable under normal operational bounds, it indicates a dead code path or broken threshold logic within the classification pipeline.
 
 ---
 
-## 4.
+## 4. The Appeal Path
 
-<!-- Your criterion. -->
+100% of submitted appeal requests on flagged assets successfully alter the asset status field (e.g., changing from flagged to under-review) and write a corresponding entry to the audit log.
 
-
-
-**Why this target:**
-
-
+**Why this target:** 
+Users must have a reliable recourse when flagged incorrectly; an appeal path that fails to record or change status breaks accountability and transparency in content moderation.
 
 ---
 
-## 5.
+## 5. Bad Input Handling
 
-<!-- Your criterion. -->
+When `text` input is entirely missing, empty (`""`), or exceeds an enormous payload limit (>100,000 words), the endpoint gracefully returns a structured HTTP 400 Bad Request error rather than crashing or hanging indefinitely.
 
+**Why this target:** 
+Robust backend services must handle malformed, empty, or malicious edge-case payloads safely without causing unhandled internal server exceptions or service downtime.
 
-
-**Why this target:**
-
-
+---
 
 ---
 
