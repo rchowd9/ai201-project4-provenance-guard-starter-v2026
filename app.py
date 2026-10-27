@@ -30,6 +30,7 @@ from flask import Flask, jsonify, request
 
 import audit
 import config
+import detector 
 
 app = Flask(__name__)
 
@@ -153,9 +154,6 @@ def health():
 @app.post("/submit")
 # @limiter.limit(f"{config.RATE_LIMIT_PER_MINUTE}/minute;{config.RATE_LIMIT_PER_DAY}/day")
 def submit():
-    payload = request.get_json(silent=True) or {}
-    text = payload.get("text")
-    creator_id = payload.get("creator_id")
     """
     Take a piece of text, decide about it, log the decision, answer.
     ← TODO — Milestones 3, 4 and 5
@@ -202,20 +200,46 @@ def submit():
     what should this do when `text` is missing, empty, or enormous? A crash on
     a malformed input is one of the most common real failures there is.
     """
-    payload = request.get_json(silent=True) or {}
+    payload = request.get_json(silent=True)
+    if not isinstance(payload, dict):
+        payload = {}
+    text = payload.get("text", "")
+    creator_id = payload.get("creator_id", "anonymous")
 
-    # TODO: delete this and build the route.
+    if not isinstance(text, str) or not text.strip():
+        audit.log_rejection(creator_id=str(creator_id), reason="missing_text")
+        return jsonify({"error": "Request needs JSON with a non-empty 'text' field."}), 400
+
+    # 1. Call the model signal
+    try:
+        model_score = detector.model_signal(text)
+    except ValueError as exc:
+        audit.log_rejection(creator_id=str(creator_id), reason="text_too_short")
+        return jsonify({"error": str(exc)}), 400
+
+    # 2. Generate a unique content ID
+    content_id = str(uuid.uuid4())
+
+    # 3. Log the decision with the content_id included
+    audit.log_decision(
+        content_id=content_id,
+        creator_id=creator_id,
+        text=text,
+        guess="pending",
+        confidence=0.0,
+        label="pending",
+        model_score=model_score,
+        style_score=0.0,
+    )
+
+    # 4. Return the response
     return jsonify({
-        "content_id": "test-content-id-123",
-        "guess": "human",
-        "confidence": 0.95,
-        "label": "human",
-        "model_score": 0.05,
-        "style_score": 0.05,
-        "received": {
-            "text_length": len(text) if text else 0,
-            "creator_id": creator_id
-        }
+        "content_id": content_id,
+        "guess": "pending",
+        "confidence": 0.0,
+        "label": "pending",
+        "model_score": model_score,
+        "style_score": 0.0,
     }), 200
 
 

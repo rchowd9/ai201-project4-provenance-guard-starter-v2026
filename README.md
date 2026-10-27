@@ -205,11 +205,18 @@ changes are cheap to make on purpose:
 ```bash
 $ curl -X POST http://127.0.0.1:5000/submit \
   -H "Content-Type: application/json" \
-  -d '{"text": "...", "creator_id": "..."}'
+  -d '{"text": "Hey, just grabbed some coffee and was looking over the git logs we talked about earlier. Let me know if you want to sync up later this afternoon to review the remaining issues. We still need to finalize the backend configuration and check all the tests.", "creator_id": "riasat"}'
 ```
 
 ```json
-
+{
+  "confidence": 0.0,
+  "content_id": "fc469753-7fe8-4b12-aa57-458b67a111e6",
+  "guess": "pending",
+  "label": "pending",
+  "model_score": 0.6255,
+  "style_score": 0.0
+}
 ```
 
 **An appeal**
@@ -227,11 +234,28 @@ $ curl -X POST http://127.0.0.1:5000/appeal \
 **What the log shows afterwards**
 
 ```bash
-$ curl "http://127.0.0.1:5000/log?limit=3"
+$ curl "http://127.0.0.1:5000/log?limit=1"
 ```
 
 ```json
-
+{
+  "count": 1,
+  "entries": [
+    {
+      "combined_score": null,
+      "confidence": 0.0,
+      "content_id": "fc469753-7fe8-4b12-aa57-458b67a111e6",
+      "creator_id": "riasat",
+      "guess": "pending",
+      "label": "pending",
+      "model_score": 0.6255,
+      "status": "decided",
+      "style_score": 0.0,
+      "text": "Hey, just grabbed some coffee and was looking over the git logs we talked about earlier. Let me know if you want to sync up later this afternoon to review the remaining issues. We still need to finalize the backend configuration and check all the tests.",
+      "timestamp": "2026-10-27T14:39:54+00:00"
+    }
+  ]
+}
 ```
 
 ---
