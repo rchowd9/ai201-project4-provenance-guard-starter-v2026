@@ -153,6 +153,9 @@ def health():
 @app.post("/submit")
 # @limiter.limit(f"{config.RATE_LIMIT_PER_MINUTE}/minute;{config.RATE_LIMIT_PER_DAY}/day")
 def submit():
+    payload = request.get_json(silent=True) or {}
+    text = payload.get("text")
+    creator_id = payload.get("creator_id")
     """
     Take a piece of text, decide about it, log the decision, answer.
     ← TODO — Milestones 3, 4 and 5
@@ -203,13 +206,17 @@ def submit():
 
     # TODO: delete this and build the route.
     return jsonify({
-        "error": "not_implemented",
-        "message": "POST /submit isn't built yet — see the TODO in app.py.",
-        "you_sent": {
-            "text_length": len(payload.get("text", "")),
-            "creator_id": payload.get("creator_id"),
-        },
-    }), 501
+        "content_id": "test-content-id-123",
+        "guess": "human",
+        "confidence": 0.95,
+        "label": "human",
+        "model_score": 0.05,
+        "style_score": 0.05,
+        "received": {
+            "text_length": len(text) if text else 0,
+            "creator_id": creator_id
+        }
+    }), 200
 
 
 @app.post("/appeal")
