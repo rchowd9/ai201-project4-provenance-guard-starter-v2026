@@ -51,12 +51,35 @@ def combine_signals(model_score: float, style_score: float) -> float:
 
     The weights in config.py are placeholders. Change them, or ignore them and
     write a different rule.
+
+    My rule: a weighted average that leans toward the more-human signal as the
+    two disagree.
+
+      1. Start from the weights in config.py (0.5 / 0.5).
+      2. Measure the gap between the two scores.
+      3. Move DISAGREEMENT_PULL × gap of weight from the higher (more AI)
+         signal to the lower (more human) one, up to all of it.
+
+    When the signals agree the result is a plain average. At a gap of 0.5 or
+    more, the lower score decides alone. Disagreement can therefore pull a
+    score toward "human" but never push it toward "AI" — I would rather let AI
+    text through than accuse a person on evidence that contradicts itself. The
+    cost: an attacker only has to fool one signal.
     """
-    # TODO: replace this
-    return (
-        config.WEIGHT_MODEL_SIGNAL * model_score
-        + config.WEIGHT_STYLE_SIGNAL * style_score
-    )
+    total = config.WEIGHT_MODEL_SIGNAL + config.WEIGHT_STYLE_SIGNAL
+    w_model = config.WEIGHT_MODEL_SIGNAL / total
+    w_style = config.WEIGHT_STYLE_SIGNAL / total
+
+    gap = abs(model_score - style_score)
+    if model_score > style_score:
+        shift = min(config.DISAGREEMENT_PULL * gap, w_model)
+        w_model, w_style = w_model - shift, w_style + shift
+    else:
+        shift = min(config.DISAGREEMENT_PULL * gap, w_style)
+        w_model, w_style = w_model + shift, w_style - shift
+
+    score = w_model * model_score + w_style * style_score
+    return round(min(max(score, 0.0), 1.0), 4)
 
 
 def score_to_label(score: float) -> tuple[str, str]:

@@ -153,16 +153,71 @@ changes are cheap to make on purpose:
 <!-- Write the rule in words, then give the numbers. What happens when the two
      signals disagree? -->
 
-**The rule:**
+**The rule:** The two signals are averaged, but the more they disagree, the more
+the decision goes to whichever signal says "more human". When they agree, the
+result is a plain average. When they contradict each other, the lower score
+counts for more, and at a gap of 0.5 or more it decides alone. Disagreement can
+pull a score towards "human" but can never push it towards "AI". I would rather
+let some AI text through than accuse a person on evidence that contradicts
+itself. The cost is that an attacker only has to fool one of the two signals,
+not both.
 
-**The numbers:**
+**The numbers** (in `config.py`):
+
+- `WEIGHT_MODEL_SIGNAL = 0.5`, `WEIGHT_STYLE_SIGNAL = 0.5`: the starting weights
+  when the signals agree.
+- `DISAGREEMENT_PULL = 1.0`: for every point of gap between the two scores, that
+  much weight moves from the higher signal to the lower one. The lower signal's
+  weight is `0.5 + gap`, capped at 1.0.
+- Example: model 0.9 and style 0.1 have a gap of 0.8, so the combined score is
+  0.1. Model 0.6 and style 0.5 have a gap of 0.1, so the weights are 0.4 / 0.6
+  and the combined score is 0.54.
+
+Why not a plain 0.5 / 0.5 average: in calibration, the model signal hardly
+separated anything. Every input scored between 0.62 and 0.87, and it rated
+Thoreau as *more* AI-like than lightly-edited AI. A plain average would leave
+the human label almost unreachable, because a text would need both signals low
+at once.
 
 **Where it lives:** `scoring.py::combine_signals`
 
 <!-- ⚠️ The grader checks your code against that line. If your rule lives
      somewhere else, say where. -->
 
-**A case where my two signals split, and what my rule does with it:**
+**Calibration inputs** (both signals printed separately, as logged):
+
+| Input | Words | model_score | style_score | Gap | combined_score |
+|---|---|---|---|---|---|
+| Clearly AI (generic "AI is transforming…" essay) | 136 | 0.8723 | 0.6395 | 0.23 | **0.7017** |
+| Clearly human (Thoreau, *Walden*, 1854) | 172 | 0.6931 | 0.2815 | 0.41 | **0.3179** |
+| Formal human (Darwin, *Origin of Species*, 1859) | 156 | 0.6869 | 0.4891 | 0.20 | **0.5489** |
+| Lightly-edited AI (the AI essay with contractions, dashes, short sentences) | 122 | 0.6247 | 0.5239 | 0.10 | **0.5641** |
+| Plain human (my own "grabbed some coffee" message) | 46 | 0.6255 | 0.6022 | 0.02 | **0.6133** |
+
+What surprised me, and which signal caused it:
+
+- **Formal human scores higher than lightly-edited AI on the model signal**
+  (0.69 vs 0.62). Light edits such as contractions, a dash and a few short
+  sentences were enough to make gpt2 less sure of the AI text. Older formal
+  prose is predictable to gpt2, possibly because it saw these famous passages
+  in training. The style signal ranked them correctly (0.49 vs 0.52), but by a
+  tiny margin.
+- **Lightly-edited AI lands in the middle (0.56), not near the clearly-AI
+  input.** Neither signal holds up against light edits. That is the evasion
+  route unit 8's attack set will use.
+- **Plain human writing scores the most AI-like of everything except the
+  clearly-AI input (0.61).** Both signals call it AI-ish, and because they
+  agree, my rule gives them no reason to lean human. This is the
+  writer Milestone 1 warned about. Both signals share the same blind spot, so
+  their agreement isn't independent evidence.
+
+**A case where my two signals split, and what my rule does with it:** Thoreau's
+*Walden* opening. The model signal says 0.69, leaning AI, because gpt2 finds old,
+famous prose predictable. The style signal says 0.28, clearly human, because the
+sentence lengths swing from a nearly 60-word sentence to "I lived there two years and
+two months." The gap is 0.41, so the style signal gets 0.91 of the weight and
+the combined score is **0.32**. A plain average would have given 0.49, squarely
+"unsure", for one of the most human texts I tested.
 
 
 

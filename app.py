@@ -30,7 +30,9 @@ from flask import Flask, jsonify, request
 
 import audit
 import config
-import detector 
+import detector
+import scoring
+import stylometry
 
 app = Flask(__name__)
 
@@ -217,10 +219,14 @@ def submit():
         audit.log_rejection(creator_id=str(creator_id), reason="text_too_short")
         return jsonify({"error": str(exc)}), 400
 
-    # 2. Generate a unique content ID
+    # 2. Call the style signal and combine the two
+    style_score = stylometry.style_signal(text)
+    combined_score = scoring.combine_signals(model_score, style_score)
+
+    # 3. Generate a unique content ID
     content_id = str(uuid.uuid4())
 
-    # 3. Log the decision with the content_id included
+    # 4. Log the decision with both signal scores beside the combined one
     audit.log_decision(
         content_id=content_id,
         creator_id=creator_id,
@@ -229,17 +235,19 @@ def submit():
         confidence=0.0,
         label="pending",
         model_score=model_score,
-        style_score=0.0,
+        style_score=style_score,
+        combined_score=combined_score,
     )
 
-    # 4. Return the response
+    # 5. Return the response
     return jsonify({
         "content_id": content_id,
         "guess": "pending",
         "confidence": 0.0,
         "label": "pending",
         "model_score": model_score,
-        "style_score": 0.0,
+        "style_score": style_score,
+        "combined_score": combined_score,
     }), 200
 
 

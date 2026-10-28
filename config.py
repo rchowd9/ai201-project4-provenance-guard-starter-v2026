@@ -57,6 +57,11 @@ DETECTOR_MAX_TOKENS = 400
 WEIGHT_MODEL_SIGNAL = 0.5
 WEIGHT_STYLE_SIGNAL = 0.5
 
+# When the two signals disagree, this much weight per point of disagreement
+# moves from the more-AI signal to the more-human one. At 1.0, a gap of 0.5 or
+# more hands the decision entirely to the signal that reads more human.
+DISAGREEMENT_PULL = 1.0
+
 
 # ─── Thresholds (Milestone 5) ────────────────────────────────────────────────
 # Where one label becomes another. Scores run 0.0 (confidently human) to 1.0
