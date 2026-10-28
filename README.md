@@ -266,11 +266,11 @@ $ curl -X POST http://127.0.0.1:5000/submit \
 ```json
 {
   "confidence": 0.0,
-  "content_id": "fc469753-7fe8-4b12-aa57-458b67a111e6",
+  "content_id": "fbc43c99-e8b8-4371-9343-e01af8b6217e",
   "guess": "pending",
   "label": "pending",
   "model_score": 0.6255,
-  "style_score": 0.0
+  "style_score": 0.6022
 }
 ```
 
