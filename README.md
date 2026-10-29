@@ -298,14 +298,22 @@ $ curl -X POST http://127.0.0.1:5000/submit \
 ```bash
 $ curl -X POST http://127.0.0.1:5000/appeal \
   -H "Content-Type: application/json" \
-  -d '{"content_id": "...", "reasoning": "..."}'
+  -d '{"content_id": "fbc43c99-e8b8-4371-9343-e01af8b6217e", "reasoning": "I wrote this message myself. It is a quick note to a teammate about checking the git logs, which is why the wording is plain."}'
 ```
 
 ```json
-
+{
+  "content_id": "fbc43c99-e8b8-4371-9343-e01af8b6217e",
+  "message": "Thanks — your appeal has been recorded. A person will review this result, and it is marked as under review until they do.",
+  "status": "under_review"
+}
 ```
 
 **What the log shows afterwards**
+
+The original decision for `fbc43c99…` stays in the log unchanged, with
+`"status": "decided"`. The log is append-only, so the appeal is a new entry
+after it with the same `content_id`, and that entry carries the new status:
 
 ```bash
 $ curl "http://127.0.0.1:5000/log?limit=1"
@@ -316,21 +324,21 @@ $ curl "http://127.0.0.1:5000/log?limit=1"
   "count": 1,
   "entries": [
     {
-      "combined_score": null,
-      "confidence": 0.0,
-      "content_id": "fc469753-7fe8-4b12-aa57-458b67a111e6",
+      "content_id": "fbc43c99-e8b8-4371-9343-e01af8b6217e",
       "creator_id": "riasat",
-      "guess": "pending",
-      "label": "pending",
-      "model_score": 0.6255,
-      "status": "decided",
-      "style_score": 0.0,
-      "text": "Hey, just grabbed some coffee and was looking over the git logs we talked about earlier. Let me know if you want to sync up later this afternoon to review the remaining issues. We still need to finalize the backend configuration and check all the tests.",
-      "timestamp": "2026-10-27T14:39:54+00:00"
+      "event": "appeal",
+      "reasoning": "I wrote this message myself. It is a quick note to a teammate about checking the git logs, which is why the wording is plain.",
+      "status": "under_review",
+      "timestamp": "2026-10-29T23:00:18+00:00"
     }
   ]
 }
 ```
+
+If the appeal fails, the error is logged too, so an appeal is never silently
+lost. A missing `content_id` or `reasoning` returns 400, and an unknown
+`content_id` returns 404. Each of these writes a `rejected` entry to the log
+saying why.
 
 ---
 

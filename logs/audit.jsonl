@@ -13,3 +13,4 @@
 {"timestamp": "2026-10-29T23:00:11+00:00", "creator_id": "unknown", "event": "rejected", "status": "rejected", "reason": "appeal_missing_content_id"}
 {"timestamp": "2026-10-29T23:00:11+00:00", "creator_id": "unknown", "event": "rejected", "status": "rejected", "reason": "appeal_missing_reasoning", "content_id": "fbc43c99-e8b8-4371-9343-e01af8b6217e"}
 {"timestamp": "2026-10-29T23:00:11+00:00", "creator_id": "unknown", "event": "rejected", "status": "rejected", "reason": "appeal_unknown_content_id", "content_id": "not-a-real-id"}
+{"timestamp": "2026-10-29T23:00:18+00:00", "content_id": "fbc43c99-e8b8-4371-9343-e01af8b6217e", "creator_id": "riasat", "event": "appeal", "status": "under_review", "reasoning": "I wrote this message myself. It is a quick note to a teammate about checking the git logs, which is why the wording is plain."}
