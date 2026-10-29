@@ -232,14 +232,33 @@ the combined score is **0.32**. A plain average would have given 0.49, squarely
 
 | Label | Score range | The exact text a reader sees |
 |---|---|---|
-| high-confidence human |  |  |
-| unsure |  |  |
-| high-confidence AI |  |  |
+| high-confidence human | 0.00 – 0.35 | We think this was probably written by a person. Its wording and sentence patterns vary in the way people's writing usually does. |
+| unsure | above 0.35 and below 0.65 | We couldn't tell whether this was written by a person or with help from an AI tool. Our checks gave mixed or weak results, which often happens with clear, plain or carefully edited writing. This is not a finding that AI was used, and it shouldn't be treated as one. |
+| high-confidence AI | 0.65 – 1.00 | We think this was probably written with help from an AI tool. Its wording and sentence patterns closely match what AI writing tools usually produce. This is an automatic estimate, not proof, and it can be wrong. If you wrote this yourself, you can appeal and a person will review it. |
+
+The score is `combined_score` from `scoring.py::combine_signals`. Exactly 0.35
+counts as human and exactly 0.65 counts as AI. The thresholds are
+`HUMAN_THRESHOLD` and `AI_THRESHOLD` in `config.py`, and the label text lives
+in `scoring.py::score_to_label`.
 
 **Why I worded the "unsure" one this way:**
 <!-- It's the hardest of the three. It has to admit uncertainty without
      sounding like an accusation, because the person reading it may well have
      written every word themselves. -->
+
+The person reading it may have written every word themselves, so it starts by
+saying what *we* couldn't do ("We couldn't tell"), not what the writing
+might be. It names the kinds of writing that usually land here (clear, plain
+or carefully edited) because in calibration those are exactly the human texts
+that scored in this band: my own plain message scored 0.61 and Darwin scored
+0.55. That way a reader who writes plainly sees an explanation, not a
+suspicion. The last sentence is there so a teacher or moderator can't read
+"unsure" as "probably AI". It isn't a finding, and the label says so. It
+doesn't mention appealing, because there is nothing to appeal against.
+
+The AI label says "probably", calls itself an estimate that can be wrong, and
+ends with what to do about it. Someone who gets it on their own work should
+learn in the same breath that a person will look again.
 
 
 
