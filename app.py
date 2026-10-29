@@ -271,14 +271,44 @@ def appeal():
     to the person on the other end. It's the only thing standing between a
     wrong accusation and nothing at all.
     """
-    payload = request.get_json(silent=True) or {}
+    payload = request.get_json(silent=True)
+    if not isinstance(payload, dict):
+        payload = {}
+    content_id = payload.get("content_id", "")
+    reasoning = payload.get("reasoning", "")
 
-    # TODO: delete this and build the route.
+    if not isinstance(content_id, str) or not content_id.strip():
+        audit.log_rejection(creator_id="unknown", reason="appeal_missing_content_id")
+        return jsonify({"error": "Request needs JSON with a 'content_id' field."}), 400
+    if not isinstance(reasoning, str) or not reasoning.strip():
+        audit.log_rejection(creator_id="unknown", reason="appeal_missing_reasoning",
+                            content_id=content_id)
+        return jsonify({"error": "Please tell us why you think the result is wrong "
+                                 "in a 'reasoning' field."}), 400
+
+    # 1. Check the content_id exists — it must point at an original decision
+    content_id = content_id.strip()
+    decisions = [e for e in audit.entries_for(content_id) if "event" not in e]
+    if not decisions:
+        audit.log_rejection(creator_id="unknown", reason="appeal_unknown_content_id",
+                            content_id=content_id)
+        return jsonify({"error": f"No submission found with content_id '{content_id}'."}), 404
+
+    # 2. Record the appeal beside the decision; this moves it to under_review
+    original = decisions[0]
+    entry = audit.log_appeal(
+        content_id=content_id,
+        creator_id=original.get("creator_id", "unknown"),
+        reasoning=reasoning.strip(),
+    )
+
+    # 3. Confirm to the writer
     return jsonify({
-        "error": "not_implemented",
-        "message": "POST /appeal isn't built yet — see the TODO in app.py.",
-        "you_sent": payload,
-    }), 501
+        "content_id": content_id,
+        "status": entry["status"],
+        "message": "Thanks — your appeal has been recorded. A person will review "
+                   "this result, and it is marked as under review until they do.",
+    }), 200
 
 
 # ── Already works ─────────────────────────────────────────────────────────────
