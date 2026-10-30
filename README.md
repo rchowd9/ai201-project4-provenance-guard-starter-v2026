@@ -36,8 +36,17 @@
 
 ## What This Does
 
+The provenance guard processes a text submission through a multi-step verification and review pipeline:
+
 <!-- The path a submission takes, from arriving to the label a reader sees.
      Six or seven steps — this is the trace you wrote in Milestone 1. -->
+
+1. **Submission & Ingestion:** A client sends a JSON payload via a `POST` request to `/submit` containing the text and a creator identifier.
+2. **Length Validation & Signal Extraction:** The server validates that the text meets the minimum token length required for analysis. It then extracts two independent signals: a transformer perplexity model (`detector.py`) measuring text predictability, and a stylometric shape analysis (`stylometry.py`) measuring sentence spread, vocabulary variety, and punctuation density.
+3. **Signal Combination & Scoring:** Both scores are combined using a disagreement-aware rule in `scoring.py::combine_signals` that weighs signals and shifts confidence toward human indicators when the signals contradict.
+4. **Label Mapping & Decision:** The combined score is mapped via `scoring.score_to_label` into one of three reader-facing categories (high-confidence human, unsure, or high-confidence AI) with clear, human-readable explanations.
+5. **Audit Logging:** Every decision, score breakdown, and rejection is recorded into an append-only JSONL log (`audit.jsonl`) via `audit.py` to maintain a permanent trace.
+6. **Appeals Path:** If a writer disputes a classification, they can submit an appeal via `POST /appeal` referencing their `content_id` and reasoning, which logs a new review entry and updates the tracking status.
 
 
 
@@ -346,15 +355,15 @@ saying why.
 
 **Moment 1**
 
-- *What I asked for:*
-- *What came back:*
-- *What I changed:*
+- *What I asked for:* Help drafting the plain-language explanation for the "unsure" label variant so that it remains neutral, avoids sounding accusatory, and references the types of clear or carefully edited writing that naturally fall into the middle band.
+- *What came back:* A draft explaining that the model experienced mixed results and that borderline scores often occur with standard prose or polished writing.
+- *What I changed:* Expanded the wording to explicitly clarify that an "unsure" status is not an AI finding and added a concluding sentence reminding readers that it requires no appeal because no adverse finding was made.
 
 **Moment 2**
 
-- *What I asked for:*
-- *What came back:*
-- *What I changed:*
+- *What I asked for:* Suggestions for handling signal disagreements inside `scoring.py::combine_signals` without allowing a conflicting signal to push a score upward toward an AI classification.
+- *What came back:* A dynamic weighting approach where the weight shifts toward the more human-leaning signal in proportion to the absolute gap between the model score and style score.
+- *What I changed:* Incorporated the `DISAGREEMENT_PULL` logic so that when signals diverge strongly, the lower (more human) score dominates the combination, ensuring false accusations are minimized while documenting the tradeoff that attackers can exploit single-signal blind spots.
 
 <!-- ═══════════════════════ UNIT 8 — THE TEST ═══════════════════════ -->
 
