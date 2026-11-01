@@ -218,33 +218,45 @@ def submit():
     except ValueError as exc:
         audit.log_rejection(creator_id=str(creator_id), reason="text_too_short")
         return jsonify({"error": str(exc)}), 400
+    except detector.DetectorUnavailable as exc:
+        audit.log_rejection(creator_id=str(creator_id), reason="detector_unavailable")
+        return jsonify({"error": str(exc)}), 503
 
     # 2. Call the style signal and combine the two
     style_score = stylometry.style_signal(text)
     combined_score = scoring.combine_signals(model_score, style_score)
 
-    # 3. Generate a unique content ID
+    # 3. Turn the score into a guess and the sentence the writer sees.
+    # Confidence is how strongly the score leans toward whichever side it's on.
+    guess, label = scoring.score_to_label(combined_score)
+    confidence = round(max(combined_score, 1 - combined_score), 4)
+
+    # 4. Generate a unique content ID
     content_id = str(uuid.uuid4())
 
-    # 4. Log the decision with both signal scores beside the combined one
+    # 5. Log the decision. The thresholds go in too, so a reader can see why
+    # this score got this label without opening config.py.
     audit.log_decision(
         content_id=content_id,
         creator_id=creator_id,
-        text=text,
-        guess="pending",
-        confidence=0.0,
-        label="pending",
+        guess=guess,
         model_score=model_score,
         style_score=style_score,
         combined_score=combined_score,
+        label=label,
+        status="decided",
+        confidence=confidence,
+        thresholds={"human_at_or_below": config.HUMAN_THRESHOLD,
+                    "ai_at_or_above": config.AI_THRESHOLD},
+        text=text,
     )
 
-    # 5. Return the response
+    # 6. Return the response
     return jsonify({
         "content_id": content_id,
-        "guess": "pending",
-        "confidence": 0.0,
-        "label": "pending",
+        "guess": guess,
+        "confidence": confidence,
+        "label": label,
         "model_score": model_score,
         "style_score": style_score,
         "combined_score": combined_score,
