@@ -390,6 +390,8 @@ can look like one. -->
 
 **The run of status codes when I pushed past it:** 
 
+200 200 200 200 200 200 200 200 200 200 200 200 429 429 429
+
 <!-- python run_attacks.py --flood 15 -->
 
 ```
