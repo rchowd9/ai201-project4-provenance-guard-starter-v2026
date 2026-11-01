@@ -371,19 +371,24 @@ saying why.
 
 ## Rate Limiting
 
-**My limits:** ___ per minute, ___ per day
+**My limits:** 12 per minute, 250 per day
 
 **Why those numbers and not others:**
+
+A real writer submitting their work for check and possible appeal during an active editing session might submit a paragraph or section every few minutes, making 12 per minute a comfortable ceiling that won't trigger false positives. A daily limit of 250 allows for heavy daily writing workflows while remaining completely hostile to automated attack scripts attempting thousands of fast iterations to map out or brute-force your detection thresholds.
+
 <!-- Think about two people: a real writer submitting their own work a few
      times an hour, and a script sending a thousand variations to map your
      thresholds. Your numbers have to be liveable for the first and hostile to
      the second. -->
 
-**What a caller counts as:** <!-- per address, or per creator_id? They fail
+**What a caller counts as:**
+Per creator identifier (`creator_id`), falling back to the remote IP address if no valid creator ID is provided.
+ <!-- per address, or per creator_id? They fail
 differently — one script can look like a thousand callers, and one household
 can look like one. -->
 
-**The run of status codes when I pushed past it:**
+**The run of status codes when I pushed past it:** 
 
 <!-- python run_attacks.py --flood 15 -->
 

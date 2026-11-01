@@ -42,11 +42,16 @@ for yourself where it lands.
 """
 
 import math
+import threading
 
 import config
 
 _model = None
 _tokenizer = None
+# Flask serves each request on its own thread. Without this, a second request
+# arriving mid-load starts a second, concurrent load, and transformers isn't
+# safe for that — you can end up with a model whose weights are still "meta".
+_load_lock = threading.Lock()
 
 
 class DetectorUnavailable(RuntimeError):
@@ -59,6 +64,13 @@ def _load():
     if _model is not None:
         return _model, _tokenizer
 
+    with _load_lock:
+        if _model is None:
+            _model, _tokenizer = _load_unlocked()
+    return _model, _tokenizer
+
+
+def _load_unlocked():
     try:
         import torch  # noqa: F401
         from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -69,9 +81,9 @@ def _load():
         ) from exc
 
     try:
-        _tokenizer = AutoTokenizer.from_pretrained(config.DETECTOR_MODEL)
-        _model = AutoModelForCausalLM.from_pretrained(config.DETECTOR_MODEL)
-        _model.eval()
+        tokenizer = AutoTokenizer.from_pretrained(config.DETECTOR_MODEL)
+        model = AutoModelForCausalLM.from_pretrained(config.DETECTOR_MODEL)
+        model.eval()
     except Exception as exc:  # noqa: BLE001
         raise DetectorUnavailable(
             f"Couldn't load '{config.DETECTOR_MODEL}': {exc}\n"
@@ -79,7 +91,7 @@ def _load():
             f"that you have disk space free."
         ) from exc
 
-    return _model, _tokenizer
+    return model, tokenizer
 
 
 def perplexity(text: str) -> float:
