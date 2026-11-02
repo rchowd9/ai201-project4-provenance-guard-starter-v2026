@@ -727,16 +727,25 @@ both signals.
 
 | Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
 |---|---|---|---|---|---|
-| 1.  |  |  |  |  |  |
-| 2.  |  |  |  |  |  |
-| 3.  |  |  |  |  |  |
-| 4.  |  |  |  |  |  |
-| 5.  |  |  |  |  |  |
+| 1. False Positives | At most 1 of 10 human pieces flagged as high-confidence AI | 0 / 10 flagged | 1 / 10 flagged | 0 / 10 flagged | **HELD** |
+| 2. Score Spread | Mean score difference between AI and human groups ≥ 0.50 | 0.58 diff | 0.61 diff | 0.57 diff | **HELD** |
+| 3. Label Coverage | All three labels (human, unsure, AI) reached across 15 samples | All 3 reached | All 3 reached | All 3 reached | **HELD** |
+| 4. The Appeal Path | 100% of appeals change status to `under_review` and log entry | 3 / 3 passed | 3 / 3 passed | 3 / 3 passed | **HELD** |
+| 5. Bad Input Handling | 100% of malformed/empty/huge bodies return HTTP 400 | All returned 400 | All returned 400 | All returned 400 | **HELD** |
 
 **Real output from one trial**, pasted as text, naming the file and function
-that produced it:
+that produced it: Criterion 1 (False Positives) & Criterion 2 & 3 (Score Spread / Label Coverage)
+*Produced by `run_eval.py` executing `scenarios.py
 
 ```json
+{
+  "criterion": 1,
+  "scenario": "my own writing",
+  "trial": 1,
+  "total_tested": 10,
+  "ai_classifications": 0,
+  "status": "pass"
+}
 
 ```
 
