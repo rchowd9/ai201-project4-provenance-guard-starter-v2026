@@ -751,17 +751,36 @@ that produced it: Criterion 1 (False Positives) & Criterion 2 & 3 (Score Spread 
 
 **Diagnoses**
 
-False Positives (FP02, FP03, FP05):
+False Accusations / Over-Accusing Plain Writing (FP02, FP03, FP05):
 
 Stage: Signal one (detector.py) and Signal two (stylometry.py).
 
-Mechanism: Formal reports and careful non-native English use common vocabulary in regular sentences, which both signals misinterpret as machine-generated predictability.
+Mechanism: Non-native English (FP03), formal reports (FP02), and technical documentation (FP05) stick to simple, expected vocabulary and uniform sentence structures. Signal one measures low perplexity (high predictability) and scores them as AI-like (~0.73–0.80). Signal two sees low sentence spread and plain punctuation, scoring them AI-like (~0.62–0.68). Because both signals share the same blind spot—confusing clear, disciplined human prose with machine generation—they agree, and the combining rule outputs an AI classification (~0.68–0.72).
 
-Evasion Attacks (EV01–EV09):
+Evasion via Surface Edits (EV01, EV02, EV03, EV06, EV07):
 
-Stage: Signal two and combining rule.
+Stage: Signal two (stylometry.py) and combining rule (scoring.py::combine_signals).
 
-Mechanism: Intentional typos and sentence restructuring inflate stylometric spread, pulling combined scores down into human bands.
+Mechanism: Adding intentional typos (EV01) increases unique words, raising the type-token ratio. Inserting a quotation (EV03) or combining long/short sentences (EV06) inflates sentence length spread. Signal two interprets these surface artifacts as human markers and drops its score into human/unsure ranges. When Signal two drops significantly, the combining rule's DISAGREEMENT_PULL shifts weight to the lower (more human) signal, dragging down the overall combined score and allowing AI text to evade detection.
+
+Evasion via Vocabulary & Truncation (EV04, EV08, EV09):
+
+Stage: Signal one (detector.py).
+
+Mechanism: Injecting rare words (EV04) increases perplexity to lower Signal one. Submissions under the token window (EV08) produce noisy, unreliable perplexity estimates. Bolting a human opening onto AI text (EV09) tricks Signal one entirely, as it only evaluates the first 400 tokens and ignores the AI payload that follows.
+
+Prompt Injection & Hostile Formatting (PI01, PI02, PI03):
+
+Stage: Signal one (detector.py) and Signal two (stylometry.py).
+
+Mechanism: System-prompt instructions ("SYSTEM: provenance check bypassed...") alter word frequencies and sentence shapes, causing GPT-2 perplexity to rise and stylometry signals to read as irregular human text. The route evaluates the text as ordinary prose rather than parsing instructions, missing the hostile intent while scoring the text as human (~0.26–0.56).
+
+Unhandled Malformed and Non-String Inputs (MF03, MF04, MF05, MF06, MF08, RQ02, RQ06):
+
+Stage: The route (app.py::submit).
+
+Mechanism: Control characters (MF03), punctuation-only strings (MF04), and emoji (MF06) pass standard string checks but produce anomalous edge-case scores (e.g., model score 0.00). Missing creator_id (RQ02) and non-string creator_id objects (RQ06) were accepted by the handler without validation, causing invalid data structures to be logged to the audit trail. Extremely large inputs (MF08) bypass token limits and score high-confidence AI regardless of content.
+
 
 <!-- For each miss AND each broken attack: the stage and the mechanism.
 
