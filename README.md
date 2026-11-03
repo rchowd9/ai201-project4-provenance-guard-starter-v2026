@@ -751,6 +751,18 @@ that produced it: Criterion 1 (False Positives) & Criterion 2 & 3 (Score Spread 
 
 **Diagnoses**
 
+False Positives (FP02, FP03, FP05):
+
+Stage: Signal one (detector.py) and Signal two (stylometry.py).
+
+Mechanism: Formal reports and careful non-native English use common vocabulary in regular sentences, which both signals misinterpret as machine-generated predictability.
+
+Evasion Attacks (EV01–EV09):
+
+Stage: Signal two and combining rule.
+
+Mechanism: Intentional typos and sentence restructuring inflate stylometric spread, pulling combined scores down into human bands.
+
 <!-- For each miss AND each broken attack: the stage and the mechanism.
 
      Your service has five stages: the route, signal one, signal two, the
