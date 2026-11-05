@@ -77,7 +77,7 @@ DISAGREEMENT_PULL = 1.0
 # that decide who pays for it.
 
 HUMAN_THRESHOLD = 0.35
-AI_THRESHOLD = 0.65
+AI_THRESHOLD = 0.72  # was 0.65; raised in unit 8 after FP02/FP03/FP05/MF08 (human, 0.685–0.719) were labelled AI
 
 # ⚠️ One thing that catches people out in Milestone 5. A weighted average can
 # only land between its two inputs — so while `style_signal` is still the stub
