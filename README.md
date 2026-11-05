@@ -366,6 +366,14 @@ saying why.
 - *What came back:* A dynamic weighting approach where the weight shifts toward the more human-leaning signal in proportion to the absolute gap between the model score and style score.
 - *What I changed:* Incorporated the `DISAGREEMENT_PULL` logic so that when signals diverge strongly, the lower (more human) score dominates the combination, ensuring false accusations are minimized while documenting the tradeoff that attackers can exploit single-signal blind spots.
 
+*Moment 3 (Unit 8)*
+
+- *What I asked for:* Assistance diagnosing why all 10 evasion attacks broke and how to adjust thresholds to protect false positives without completely breaking label reachability.
+
+- *What came back:* A suggestion to raise AI_THRESHOLD to 0.72 to eliminate false accusations on formal human writing (FP02, FP03, FP05) while explaining the cost to evasion detection.
+
+- *What I changed:* Accepted the threshold change to 0.72 and authored the analysis detailing how shifting the threshold moves AI text into the "unsure" band to protect honest human authors.
+
 <!-- ═══════════════════════ UNIT 8 — THE TEST ═══════════════════════ -->
 
 ---
@@ -959,6 +967,14 @@ other side.**
 <!-- For each attack still getting through and each criterion still missed:
      what you'd do, and why you stopped. -->
 
+Criterion 2 (Score Spread Target Missed): The mean score difference between AI and human groups remained around 0.27 instead of the target 0.50. What I'd do: Implement a secondary stylistic classifier or fine-tune feature anchors to widen the separation. Why I stopped: Ran out of time and architectural scope within the local GPT-2 baseline constraint.
+
+Criterion 3 (Label Coverage Target Missed): The "human" label was never automatically hit across the 15 evaluation samples because clean, clear, or formal human prose naturally gravitates into the "unsure" band. What I'd do: Lower the HUMAN_THRESHOLD to capture more text. Why I stopped: Doing so would directly increase false accusations against human writers, violating the core safety principle.
+
+Criterion 5 (Bad Input / Huge Body Missed): Extremely large inputs (like MF08 at 57,640+ characters) still slipped past truncation bounds or generated high AI confidence scores without failing gracefully with a 400. What I'd do: Implement a strict server-side word/token truncation check right at the route entry point before passing payloads to the detector. Why I stopped: Time constraints and prioritization of core classification paths.
+
+Evasion & Prompt Injections: Sophisticated stylometric edits (typos, punctuation padding, and system-prompt framing) continue to bypass single signals or manipulate score weighting. What I'd do: Add an adversarial filter layer or LLM-based intent parser. Why I stopped: Beyond the scope of a local lightweight heuristic guard.
+
 
 
 **The trade I'd make if this ran for real:**
@@ -966,6 +982,7 @@ other side.**
 <!-- Two sentences. Fewer wrong accusations means more AI text getting through.
      Say which way you'd go and WHO PAYS FOR IT. -->
 
+I would choose to keep the higher threshold and wider "unsure" band, allowing more AI-generated text to pass unflagged rather than risking false accusations against real human authors. Accusing an innocent writer of cheating inflicts immediate academic and professional harm on a person who cannot easily prove their innocence, whereas letting AI text slip through simply costs the platform a minor moderation gap.
 
 
 <!-- ═════════════════════════════════════════════════════════════════════
