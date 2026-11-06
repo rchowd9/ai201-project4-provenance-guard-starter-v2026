@@ -987,6 +987,14 @@ I would choose to keep the higher threshold and wider "unsure" band, allowing mo
 ## The Shape
 Shape A — Deploy and instrument. I am running the system locally with full instrumentation and an append-only audit log (audit.jsonl), capturing execution paths, rejections, and rate-limiting behaviors. This operational layer measures the run path and live performance numbers coming directly out of the local service. By tracking these metrics and operational logs, I can monitor system reliability and evaluate request outcomes under live execution conditions.
 
+What's Out of Scope
+
+I'm not migrating to a cloud database: I am keeping the storage backend local (using in-memory rate limiting and a JSONL file) rather than deploying external SQL databases or distributed caches.
+
+I'm not rebuilding the user interface: I am relying entirely on JSON API endpoints and curl-based verification rather than building a graphical web front-end.
+
+I'm not adding external third-party AI APIs: I am sticking strictly to the local GPT-2 model instance rather than integrating commercial cloud-based detection services.
+
 
 <!-- ═════════════════════════════════════════════════════════════════════
 
