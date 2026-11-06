@@ -984,6 +984,9 @@ Evasion & Prompt Injections: Sophisticated stylometric edits (typos, punctuation
 
 I would choose to keep the higher threshold and wider "unsure" band, allowing more AI-generated text to pass unflagged rather than risking false accusations against real human authors. Accusing an innocent writer of cheating inflicts immediate academic and professional harm on a person who cannot easily prove their innocence, whereas letting AI text slip through simply costs the platform a minor moderation gap.
 
+## The Shape
+Shape A — Deploy and instrument. I am running the system locally with full instrumentation and an append-only audit log (audit.jsonl), capturing execution paths, rejections, and rate-limiting behaviors. This operational layer measures the run path and live performance numbers coming directly out of the local service. By tracking these metrics and operational logs, I can monitor system reliability and evaluate request outcomes under live execution conditions.
+
 
 <!-- ═════════════════════════════════════════════════════════════════════
 
