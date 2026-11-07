@@ -113,3 +113,12 @@ RATE_LIMIT_STORAGE = "memory://"
 LOG_DIR = ROOT / "logs"
 AUDIT_LOG = LOG_DIR / "audit.jsonl"
 RESULTS_DIR = ROOT / "results"
+
+# Shape A — the operational log. One line per HTTP request: route, status,
+# total time and the per-stage breakdown of /submit. Never the submitted text.
+REQUEST_LOG = LOG_DIR / "requests.jsonl"
+
+# Load the model before accepting traffic, so the first writer doesn't pay the
+# 10–20 s load inside their request. serve.py turns this on; `python app.py`
+# leaves it off so the class workflow is unchanged.
+WARMUP_ON_START = os.getenv("AI201_WARMUP", "0") == "1"
