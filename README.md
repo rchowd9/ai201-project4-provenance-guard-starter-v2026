@@ -987,6 +987,31 @@ I would choose to keep the higher threshold and wider "unsure" band, allowing mo
 ## The Shape
 Shape A — Deploy and instrument. I am running the system locally with full instrumentation and an append-only audit log (audit.jsonl), capturing execution paths, rejections, and rate-limiting behaviors. This operational layer measures the run path and live performance numbers coming directly out of the local service. By tracking these metrics and operational logs, I can monitor system reliability and evaluate request outcomes under live execution conditions.
 
+**What's built:**
+
+| Piece | What it does |
+|---|---|
+| `serve.py` | The deployed run: debug off, gpt2 loaded and timed *before* the port opens, gunicorn on Linux/macOS (Flask threaded on Windows, where gunicorn can't run) |
+| `instrumentation.py` | Gives every request an id, times each `/submit` stage (validate → signal_one → signal_two → combine → label → audit_write), and appends one line to `logs/requests.jsonl`. 400s and 429s are logged too. The text itself is never written |
+| `GET /metrics` | Live snapshot: requests by status, latency percentiles per route and per stage, model load time, resident memory vs. a 512 MB budget |
+| `Server-Timing` / `X-Request-ID` headers | `curl -i` shows the stage breakdown of a single request |
+| `perf_report.py --probe 20` | Sends probe traffic and writes `results/perf_<date>.md` from the request log |
+
+**The numbers** (`results/perf_2026-11-07_1223.md`, Windows laptop, CPU only):
+
+- Model load at startup: **10.6 s**. RSS goes from 39 MB to 383 MB.
+- `/submit` warm latency: **p50 246 ms, p95 345 ms**. The first scored request
+  after warm-up took 1.8 s while torch finished initialising.
+- **Signal one is 99.1% of a submission.** Signal two, combining, labelling and
+  the audit write together take under 2 ms.
+- Throughput: **2.9 submissions/s** from one sequential client.
+- Peak RSS while scoring: **1,271 MB**, rising to 1,480 MB after more traffic.
+  A free tier allows **512 MB**, so the service needs about 2.5× the budget. At
+  idle it fits, but the first real request pushes it over. That's why this runs
+  as Path B: local, with logs.
+- A 13th submission from one creator within a minute returns 429 in about 2 ms,
+  and that rejection appears in both logs.
+
 ## What's Out of Scope
 
 I'm not migrating to a cloud database: I am keeping the storage backend local (using in-memory rate limiting and a JSONL file) rather than deploying external SQL databases or distributed caches.
