@@ -22,8 +22,10 @@ Routes:
     POST /appeal      ← YOU BUILD THIS (Milestone 5)
     GET  /log         the audit log. Already works
     GET  /health      is the service up, and is the model loaded
+    GET  /metrics     Shape A: live latency, status codes and memory
 """
 
+import time
 import uuid
 
 from flask import Flask, jsonify, request
@@ -31,10 +33,15 @@ from flask import Flask, jsonify, request
 import audit
 import config
 import detector
+import instrumentation
 import scoring
 import stylometry
 
 app = Flask(__name__)
+
+# Shape A — every request gets an id, a timing, and a line in logs/requests.jsonl.
+# Registered before the limiter so a 429 is timed and logged too.
+instrumentation.init_app(app)
 
 
 # ── Rate limiting — UNIT 8 ────────────────────────────────────────────────────
@@ -202,54 +209,68 @@ def submit():
     what should this do when `text` is missing, empty, or enormous? A crash on
     a malformed input is one of the most common real failures there is.
     """
-    payload = request.get_json(silent=True)
-    if not isinstance(payload, dict):
-        payload = {}
-    text = payload.get("text", "")
-    creator_id = payload.get("creator_id", "anonymous")
+    with instrumentation.stage("validate"):
+        payload = request.get_json(silent=True)
+        if not isinstance(payload, dict):
+            payload = {}
+        text = payload.get("text", "")
+        creator_id = payload.get("creator_id", "anonymous")
 
     if not isinstance(text, str) or not text.strip():
         audit.log_rejection(creator_id=str(creator_id), reason="missing_text")
         return jsonify({"error": "Request needs JSON with a non-empty 'text' field."}), 400
 
-    # 1. Call the model signal
+    instrumentation.note(text_chars=len(text))
+
+    # 1. Call the model signal. If the model isn't in memory yet, this request
+    # pays for loading it — record that, or the slow request looks unexplained.
+    cold = detector._model is None
     try:
-        model_score = detector.model_signal(text)
+        with instrumentation.stage("signal_one"):
+            t_model = time.perf_counter()
+            model_score = detector.model_signal(text)
     except ValueError as exc:
         audit.log_rejection(creator_id=str(creator_id), reason="text_too_short")
         return jsonify({"error": str(exc)}), 400
     except detector.DetectorUnavailable as exc:
         audit.log_rejection(creator_id=str(creator_id), reason="detector_unavailable")
         return jsonify({"error": str(exc)}), 503
+    if cold:
+        instrumentation.note(cold_start=True)
+        instrumentation.record_cold_load(time.perf_counter() - t_model)
 
     # 2. Call the style signal and combine the two
-    style_score = stylometry.style_signal(text)
-    combined_score = scoring.combine_signals(model_score, style_score)
+    with instrumentation.stage("signal_two"):
+        style_score = stylometry.style_signal(text)
+    with instrumentation.stage("combine"):
+        combined_score = scoring.combine_signals(model_score, style_score)
 
     # 3. Turn the score into a guess and the sentence the writer sees.
     # Confidence is how strongly the score leans toward whichever side it's on.
-    guess, label = scoring.score_to_label(combined_score)
-    confidence = round(max(combined_score, 1 - combined_score), 4)
+    with instrumentation.stage("label"):
+        guess, label = scoring.score_to_label(combined_score)
+        confidence = round(max(combined_score, 1 - combined_score), 4)
 
     # 4. Generate a unique content ID
     content_id = str(uuid.uuid4())
 
     # 5. Log the decision. The thresholds go in too, so a reader can see why
     # this score got this label without opening config.py.
-    audit.log_decision(
-        content_id=content_id,
-        creator_id=creator_id,
-        guess=guess,
-        model_score=model_score,
-        style_score=style_score,
-        combined_score=combined_score,
-        label=label,
-        status="decided",
-        confidence=confidence,
-        thresholds={"human_at_or_below": config.HUMAN_THRESHOLD,
-                    "ai_at_or_above": config.AI_THRESHOLD},
-        text=text,
-    )
+    with instrumentation.stage("audit_write"):
+        audit.log_decision(
+            content_id=content_id,
+            creator_id=creator_id,
+            guess=guess,
+            model_score=model_score,
+            style_score=style_score,
+            combined_score=combined_score,
+            label=label,
+            status="decided",
+            confidence=confidence,
+            thresholds={"human_at_or_below": config.HUMAN_THRESHOLD,
+                        "ai_at_or_above": config.AI_THRESHOLD},
+            text=text,
+        )
 
     # 6. Return the response
     return jsonify({
@@ -337,6 +358,28 @@ def get_log():
     limit = request.args.get("limit", type=int)
     entries = audit.read_entries(limit=limit)
     return jsonify({"count": len(entries), "entries": entries})
+
+
+# ── Shape A — deploy and instrument ───────────────────────────────────────────
+
+@app.get("/metrics")
+def metrics():
+    """
+    Live numbers from this process: requests by status code, latency
+    percentiles per route, the per-stage breakdown of /submit, model load
+    time, and resident memory against a 512 MB free-tier budget.
+
+        curl http://127.0.0.1:5000/metrics
+
+    For numbers across restarts or several workers, use `perf_report.py`,
+    which reads logs/requests.jsonl instead.
+    """
+    return jsonify(instrumentation.snapshot())
+
+
+if config.WARMUP_ON_START:
+    # Under gunicorn this runs once per worker (or once in total with --preload).
+    instrumentation.warm_up()
 
 
 def main():
