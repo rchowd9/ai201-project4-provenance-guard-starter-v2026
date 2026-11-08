@@ -147,7 +147,7 @@ def build_report(rows: list[dict], probe_result: dict | None, since: str | None)
     lines += ["## Latency by route (server-side, ms)", ""]
     by_route: dict = {}
     for r in reqs:
-        by_route.setdefault(f"{r['method']} {r['route']}", []).append(r["total_ms"])
+        by_route.setdefault(f"{r['method']} {r['route']}", []).append(r.get("duration_ms", r.get("total_ms")))
     lines.append(_table(
         ["route", "n", "p50", "p95", "p99", "max", "mean"],
         [[k, *(pct(v).get(x, "—") for x in ("count", "p50", "p95", "p99", "max", "mean"))]
@@ -161,7 +161,7 @@ def build_report(rows: list[dict], probe_result: dict | None, since: str | None)
     lines += ["## Where the time goes in a /submit (200s, warm model, ms)", ""]
     if warm:
         stage_names = ["validate", "signal_one", "signal_two", "combine", "label", "audit_write"]
-        totals = [r["total_ms"] for r in warm]
+        totals = [r.get("duration_ms", r.get("total_ms")) for r in warm]
         mean_total = sum(totals) / len(totals)
         table = []
         for name in stage_names:
@@ -169,7 +169,7 @@ def build_report(rows: list[dict], probe_result: dict | None, since: str | None)
             p = pct(vals)
             share = 100 * p["mean"] / mean_total if mean_total else 0
             table.append([name, p["p50"], p["p95"], p["max"], p["mean"], f"{share:.1f}%"])
-        overhead = [r["total_ms"] - sum(r["stages_ms"].values()) for r in warm]
+        overhead = [r.get("duration_ms", r.get("total_ms")) - sum(r["stages_ms"].values()) for r in warm]
         p = pct(overhead)
         table.append(["(framework + limiter)", p["p50"], p["p95"], p["max"], p["mean"],
                       f"{100 * p['mean'] / mean_total:.1f}%"])
@@ -186,7 +186,7 @@ def build_report(rows: list[dict], probe_result: dict | None, since: str | None)
     if cold:
         lines.append(_table(
             ["timestamp", "request_id", "total ms", "signal_one ms"],
-            [[r["timestamp"], r["request_id"], r["total_ms"], r["stages_ms"].get("signal_one")]
+            [[r["timestamp"], r["request_id"], r.get("duration_ms", r.get("total_ms")), r["stages_ms"].get("signal_one")]
              for r in cold],
         ))
         lines.append("")

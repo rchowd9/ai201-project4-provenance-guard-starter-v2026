@@ -8,12 +8,39 @@ the process is holding.
 
 Three outputs, all from the same measurements:
 
-    logs/requests.jsonl   one line per HTTP request — the operational log.
-                          Append-only, like the audit log, and joined to it
-                          by content_id. No submitted text is written here.
+    logs/requests.jsonl   one structured record per run (HTTP request), plus
+                          a `startup` record per process. Append-only, like
+                          the audit log, and joined to it by content_id.
     GET /metrics          a live snapshot of the counters below, from memory.
     response headers      X-Request-ID and Server-Timing on every response,
                           so a single curl -i shows the stage breakdown.
+
+Every record has the same named fields:
+
+    timestamp    UTC, milliseconds
+    event        "request" or "startup"
+    request_id   also returned as the X-Request-ID header
+    method, route, status
+    outcome      ok | rejected (4xx) | rate_limited (429) | error (5xx / crash)
+    duration_ms  wall time of the whole run
+    input        what was sent: creator_id, and for text/reasoning the length,
+                 word count, a sha256 prefix and a 160-char preview. Wrong
+                 types are named ("<int>"); an unparseable body keeps a preview
+    output       what came back: content_id, guess, confidence, all three
+                 scores, or the error message
+    stages_ms    time per /submit stage (below)
+    settings     model and thresholds in force, so an old record explains itself
+    rss_mb, pid  memory and process
+    exception    on a crash: type, message, last traceback frames
+    failed_stage on a crash: which stage it died in
+    cold_start, text_chars   when relevant
+
+Failures are records, not gaps. A request that crashes still gets an
+`outcome: "error"` record even under `python app.py`, where debug mode lets the
+exception escape before after_request runs: teardown_request writes it. A
+startup that can't load the model writes an `event: "startup"` error record.
+
+Read it back:  python instrumentation.py --outcome error --json
 
 The stages timed inside /submit match the five stages the README names, plus
 the log write:
@@ -26,12 +53,14 @@ request log is shared by every worker, which is why `perf_report.py` builds its
 numbers from the file rather than from /metrics.
 """
 
+import hashlib
 import json
 import math
 import os
 import sys
 import threading
 import time
+import traceback
 import uuid
 from collections import Counter, defaultdict, deque
 from contextlib import contextmanager
@@ -134,6 +163,11 @@ def stage(name: str):
     start = time.perf_counter()
     try:
         yield
+    except BaseException:
+        extra = getattr(g, "ops_extra", None)
+        if extra is not None and "failed_stage" not in extra:
+            extra["failed_stage"] = name   # where a crashed run died
+        raise
     finally:
         elapsed = (time.perf_counter() - start) * 1000
         stages = getattr(g, "stages", None)
@@ -163,13 +197,32 @@ def warm_up() -> dict:
 
     rss_before = rss_mb()
     start = time.perf_counter()
-    detector.warm_up()
+    try:
+        detector.warm_up()
+    except Exception as exc:
+        # A service that couldn't start must leave a record too.
+        _write({
+            "timestamp": _now(),
+            "event": "startup",
+            "outcome": "error",
+            "model": config.DETECTOR_MODEL,
+            "duration_ms": round((time.perf_counter() - start) * 1000, 2),
+            "exception": {
+                "type": type(exc).__name__,
+                "message": str(exc)[:500],
+                "traceback": traceback.format_exception(type(exc), exc, exc.__traceback__)[-6:],
+            },
+            "pid": os.getpid(),
+        })
+        raise
     _model_load_s = round(time.perf_counter() - start, 2)
     rss_after = _note_rss()
 
     event = {
         "timestamp": _now(),
         "event": "startup",
+        "outcome": "ok",
+        "duration_ms": round(_model_load_s * 1000, 2),
         "model": config.DETECTOR_MODEL,
         "model_load_s": _model_load_s,
         "rss_mb_before_model": rss_before,
@@ -189,8 +242,157 @@ def record_cold_load(seconds: float):
 
 # ── Flask wiring ─────────────────────────────────────────────────────────────
 
+# How much of the submitted text a run record keeps. Enough to recognise the
+# input when reading the log back; the full text is in the audit log for
+# decisions. The hash identifies the exact input without storing it all.
+INPUT_PREVIEW_CHARS = 160
+
+# Response fields copied into a record's `output`. Labels are long and fixed
+# per guess, so the guess stands in for them.
+_OUTPUT_FIELDS = ("content_id", "guess", "confidence", "combined_score",
+                  "model_score", "style_score", "status", "error", "message", "limit")
+
+
+def _preview(text: str) -> str:
+    return text if len(text) <= INPUT_PREVIEW_CHARS else text[:INPUT_PREVIEW_CHARS] + "…"
+
+
+def _describe_input() -> dict:
+    """What the caller sent, as named fields — readable later, never huge."""
+    info = {
+        "content_type": request.mimetype or None,
+        "bytes": request.content_length,
+    }
+    if request.args:
+        info["query"] = request.args.to_dict()
+
+    payload = request.get_json(silent=True)  # cached; costs nothing after the route
+    if isinstance(payload, dict):
+        creator = payload.get("creator_id")
+        info["creator_id"] = creator if isinstance(creator, str) else (
+            None if creator is None else f"<{type(creator).__name__}>")
+        for field in ("text", "reasoning", "message"):
+            value = payload.get(field)
+            if isinstance(value, str):
+                info[field] = {
+                    "chars": len(value),
+                    "words": len(value.split()),
+                    "sha256": hashlib.sha256(value.encode("utf-8", "replace")).hexdigest()[:16],
+                    "preview": _preview(value),
+                }
+            elif field in payload:
+                info[field] = f"<{type(value).__name__}>"   # wrong type: say what it was
+        if "content_id" in payload:
+            info["content_id"] = payload.get("content_id")
+    elif payload is not None:
+        info["json_type"] = type(payload).__name__        # e.g. a bare list
+    elif request.content_length:
+        raw = request.get_data(cache=True)[:INPUT_PREVIEW_CHARS]
+        info["raw_preview"] = raw.decode("utf-8", "replace")  # unparseable body
+    return info
+
+
+def _describe_output(response) -> dict:
+    out = {"status": response.status_code}
+    if response.is_json:
+        body = response.get_json(silent=True)
+        if isinstance(body, dict):
+            for key in _OUTPUT_FIELDS:
+                if key in body and key != "status":
+                    out[key] = body[key]
+            if "status" in body:
+                out["item_status"] = body["status"]
+    return out
+
+
+def _outcome(status: int) -> str:
+    if status >= 500:
+        return "error"
+    if status == 429:
+        return "rate_limited"
+    if status >= 400:
+        return "rejected"
+    return "ok"
+
+
+def _settings() -> dict:
+    """The settings that decide an outcome, so an old record explains itself."""
+    return {
+        "model": config.DETECTOR_MODEL,
+        "human_threshold": config.HUMAN_THRESHOLD,
+        "ai_threshold": config.AI_THRESHOLD,
+        "rate_limiting": config.RATE_LIMITING_ENABLED,
+    }
+
+
+def _record(status: int, response=None) -> dict:
+    """Build the one structured record for this run (request)."""
+    t0 = getattr(g, "t0", None)
+    duration_ms = round((time.perf_counter() - t0) * 1000, 2) if t0 else None
+    route = request.url_rule.rule if request.url_rule else request.path
+    stages = getattr(g, "stages", {})
+
+    entry = {
+        "timestamp": _now(),
+        "event": "request",
+        "request_id": getattr(g, "request_id", None),
+        "method": request.method,
+        "route": route,
+        "status": status,
+        "outcome": _outcome(status),
+        "duration_ms": duration_ms,
+        "input": _safe(_describe_input),
+        "output": _describe_output(response) if response is not None else {"status": status},
+        "stages_ms": stages,
+        "settings": _settings(),
+        "rss_mb": _note_rss(),
+        "pid": os.getpid(),
+    }
+    entry.update(getattr(g, "ops_extra", {}))
+    exc = getattr(g, "exception", None)
+    if exc:
+        entry["exception"] = exc
+
+    with _lock:
+        _status_counts[(request.method, route, status)] += 1
+        if duration_ms is not None:
+            _route_ms[route].append(duration_ms)
+        for name, ms in stages.items():
+            _stage_ms[name].append(ms)
+    return entry
+
+
+def _safe(fn):
+    try:
+        return fn()
+    except Exception as exc:  # noqa: BLE001 — describing the input must not fail the log
+        return {"unreadable": f"{type(exc).__name__}: {exc}"}
+
+
+def _capture_exception(exc: BaseException):
+    """Keep the exception's name, message and where it happened, for the record."""
+    try:
+        g.exception = {
+            "type": type(exc).__name__,
+            "message": str(exc)[:500],
+            "traceback": traceback.format_exception(type(exc), exc, exc.__traceback__)[-6:],
+        }
+    except RuntimeError:
+        pass  # outside a request context
+
+
 def init_app(app):
-    """Hook every request: give it an id, time it, log it, count it."""
+    """
+    Hook every request: give it an id, time it, and write ONE structured
+    record of it — including the requests that crash.
+
+    after_request builds the record when there is a response. teardown_request
+    always runs, so if after_request never did (an unhandled exception under
+    `python app.py`, where debug mode lets it propagate), teardown writes an
+    `outcome: "error"` record with the exception instead. A run that errored
+    is never just a gap in the log.
+    """
+    from flask import got_request_exception
 
     @app.before_request
     def _start():
@@ -199,51 +401,41 @@ def init_app(app):
         g.stages = {}
         g.ops_extra = {}
 
+    def _on_exception(sender, exception, **_):
+        _capture_exception(exception)
+
+    got_request_exception.connect(_on_exception, app, weak=False)
+
     @app.after_request
     def _finish(response):
-        t0 = getattr(g, "t0", None)
-        if t0 is None:  # a request that never reached before_request
+        if getattr(g, "t0", None) is None:  # never reached before_request
             return response
 
-        total_ms = round((time.perf_counter() - t0) * 1000, 2)
-        route = request.url_rule.rule if request.url_rule else request.path
-        stages = getattr(g, "stages", {})
-        current_rss = _note_rss()
-
-        with _lock:
-            _status_counts[(request.method, route, response.status_code)] += 1
-            _route_ms[route].append(total_ms)
-            for name, ms in stages.items():
-                _stage_ms[name].append(ms)
-
-        entry = {
-            "timestamp": _now(),
-            "request_id": g.request_id,
-            "method": request.method,
-            "route": route,
-            "status": response.status_code,
-            "total_ms": total_ms,
-            "stages_ms": stages,
-            "request_bytes": request.content_length,
-            "rss_mb": current_rss,
-            "pid": os.getpid(),
-        }
-        # Join key to the audit log, without re-logging the decision itself.
-        if response.is_json and route in ("/submit", "/appeal"):
-            body = response.get_json(silent=True)
-            if isinstance(body, dict):
-                for key in ("content_id", "guess", "error"):
-                    if key in body:
-                        entry[key] = body[key]
-        entry.update(getattr(g, "ops_extra", {}))
-        if route != "/metrics":  # polling the dashboard shouldn't flood the log
-            _write(entry)
+        entry = _record(response.status_code, response)
+        g.ops_record = entry
 
         response.headers["X-Request-ID"] = g.request_id
-        timing = [f"{name};dur={ms}" for name, ms in stages.items()]
-        timing.append(f"total;dur={total_ms}")
+        timing = [f"{name};dur={ms}" for name, ms in entry["stages_ms"].items()]
+        timing.append(f"total;dur={entry['duration_ms']}")
         response.headers["Server-Timing"] = ", ".join(timing)
         return response
+
+    @app.teardown_request
+    def _write_record(exc):
+        if getattr(g, "t0", None) is None:
+            return
+        entry = getattr(g, "ops_record", None)
+        if entry is None:
+            # No response was built: the request died. Record that it did.
+            if exc is not None and getattr(g, "exception", None) is None:
+                _capture_exception(exc)
+            entry = _record(500)
+            entry["outcome"] = "error"
+        elif exc is not None and "exception" not in entry:
+            _capture_exception(exc)
+            entry["exception"] = g.exception
+        if entry["route"] != "/metrics":  # polling the dashboard shouldn't flood the log
+            _write(entry)
 
 
 # ── Reading it back ──────────────────────────────────────────────────────────
@@ -319,8 +511,20 @@ def _write(entry: dict):
         pass  # losing one ops line is better than failing the request
 
 
-def read_requests() -> list[dict]:
-    """The ops log, oldest first. Malformed lines are skipped."""
+def read_requests(outcome: str | None = None, limit: int | None = None) -> list[dict]:
+    """
+    The run log, oldest first. Malformed lines are skipped.
+
+        read_requests(outcome="error")      # every run that crashed
+        read_requests(limit=20)             # the last 20 records
+    """
+    rows = _read_all()
+    if outcome:
+        rows = [r for r in rows if r.get("outcome") == outcome]
+    return rows[-limit:] if limit else rows
+
+
+def _read_all() -> list[dict]:
     if not config.REQUEST_LOG.exists():
         return []
     rows = []
@@ -333,3 +537,32 @@ def read_requests() -> list[dict]:
         except json.JSONDecodeError:
             continue
     return rows
+
+
+# ── Reading it back from a terminal ──────────────────────────────────────────
+
+if __name__ == "__main__":
+    import argparse
+
+    ap = argparse.ArgumentParser(description="Read back logs/requests.jsonl.")
+    ap.add_argument("--last", type=int, default=10, help="how many records (default 10)")
+    ap.add_argument("--outcome", choices=["ok", "rejected", "rate_limited", "error"],
+                    help="only records with this outcome")
+    ap.add_argument("--json", action="store_true", help="print full records as JSON")
+    args = ap.parse_args()
+
+    records = read_requests(outcome=args.outcome, limit=args.last)
+    if not records:
+        print(f"No matching records in {config.REQUEST_LOG}")
+    for r in records:
+        if args.json:
+            print(json.dumps(r, indent=2, ensure_ascii=False))
+            continue
+        dur = r.get("duration_ms", r.get("total_ms"))
+        out = r.get("output") or {}
+        detail = out.get("guess") or out.get("error") or ""
+        if r.get("exception"):
+            detail = f"{r['exception']['type']}: {r['exception']['message']}"
+        print(f"{r.get('timestamp', '?'):<30} {r.get('outcome', '-'):<12} "
+              f"{r.get('status', ''):<4} {r.get('method', r.get('event', '')):<7} "
+              f"{r.get('route', ''):<9} {dur if dur is not None else '':>9} ms  {detail}")
