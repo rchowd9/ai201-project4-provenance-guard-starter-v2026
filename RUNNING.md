@@ -90,6 +90,7 @@ position.**
 | `GET /log` | **works** | The audit log, as JSON |
 | `POST /submit` | **you build it** | Milestones 3, 4, 5 |
 | `POST /appeal` | **you build it** | Milestone 5 |
+| `GET /metrics` | **works** (Shape A) | Live latency, status codes, per-stage timing and memory |
 
 ---
 
@@ -105,6 +106,8 @@ position.**
 | `python run_attacks.py --set <folder>` | The attack set — **unit 8** |
 | `python run_attacks.py --flood 15` | Push past your rate limit and print the status codes — **unit 8** |
 | `python run_eval.py --label before` | Your five criteria, three trials — **unit 8** |
+| `python serve.py` | Runs the service the deployed way: debug off, model warm, instrumented — **Shape A** |
+| `python perf_report.py --probe 20` | Sends probe traffic and writes `results/perf_<date>.md` — **Shape A** |
 
 ---
 
@@ -232,6 +235,86 @@ system doesn't fit its host *before* you spend an evening watching it get
 killed is the skill unit 9 is actually testing. Write the arithmetic above in
 your write-up; that's the deliverable.
 
+### How this one is deployed — Shape A, Path B
+
+The README's **The Shape** section picks **Shape A — deploy and instrument**.
+It runs on this machine with full instrumentation, not on a host, so there is no
+public URL. The address is local:
+
+**`http://127.0.0.1:5000`** (live numbers at **`http://127.0.0.1:5000/metrics`**)
+
+**How it got there:** `serve.py` binds `HOST:PORT` (default loopback, port 5000)
+after loading gpt2. Nothing is forwarded or exposed beyond this machine. Only
+loopback is used because the measured memory (below) rules out the free host,
+and a laptop service on `0.0.0.0` would be reachable by anyone on the network.
+
+**The exact start command**, from the repo root with the venv active:
+
+```bash
+python serve.py
+```
+
+PowerShell, without activating the venv:
+
+```powershell
+.venv\Scripts\python.exe serve.py
+```
+
+It's ready when it prints `server: ...` and `Running on http://127.0.0.1:5000`.
+Before that it loads the model (about 10–11 s) and prints the load time and
+memory. Stop it with `Ctrl+C`.
+
+On Linux/macOS you can run gunicorn directly instead. Keep it at **one** worker:
+each worker holds its own copy of gpt2, and the `memory://` rate-limit store
+isn't shared between workers.
+
+```bash
+AI201_WARMUP=1 AI201_DEBUG=0 gunicorn app:app --bind 127.0.0.1:5000 --preload --workers 1 --threads 4 --timeout 120
+```
+
+**What the environment needs:**
+
+| Need | Value |
+|---|---|
+| Python | 3.11, 3.12 or 3.13 (not 3.14). Measured on 3.13.15 |
+| Packages | `pip install -r requirements.txt` into `.venv` |
+| Model | gpt2 already downloaded (`python detector.py` once, ~550 MB in the Hugging Face cache) |
+| Memory | **At least 1.5 GB free.** Measured: 383 MB idle after load, 1,271 MB peak while scoring, 1,480 MB after a flood |
+| Disk | ~550 MB model cache, plus `logs/` (append-only, grows with traffic) |
+| Network | None at runtime. No API key, no hosted service |
+| Port | 5000 free (or set `PORT`) |
+| OS server | gunicorn on Linux/macOS. On Windows gunicorn can't run, so `serve.py` uses waitress if installed, otherwise Flask threaded with debug off |
+
+**Environment variables** (all optional; `serve.py` sets the last two for you):
+
+| Variable | Default under `serve.py` | What it does |
+|---|---|---|
+| `HOST` | `127.0.0.1` | Bind address. Leave it on loopback for Path B |
+| `PORT` | `5000` | Bind port |
+| `AI201_WARMUP` | `1` | Load and time the model before the port opens |
+| `AI201_DEBUG` | `0` | Debug off. Never on outside your own machine |
+
+**Checking it's up and instrumented:**
+
+```bash
+curl http://127.0.0.1:5000/health
+curl -i -X POST http://127.0.0.1:5000/submit \
+  -H "Content-Type: application/json" \
+  -d '{"text": "I lived there two years and two months. At present I am a sojourner in civilized life again.", "creator_id": "me"}'
+curl http://127.0.0.1:5000/metrics
+python perf_report.py --probe 20      # writes results/perf_<date>.md
+```
+
+The `-i` response carries `X-Request-ID` and a `Server-Timing` header with
+each stage's milliseconds. Every request, including 400s and 429s, adds a line
+to `logs/requests.jsonl`. **`perf_report.py --probe` writes real decisions to
+`logs/audit.jsonl`** under `perf_probe_*` creator ids, so run it knowingly.
+
+**Measured on this machine** (`results/perf_2026-11-07_1223.md`, CPU only):
+model load 10.6 s; `/submit` p50 246 ms, p95 345 ms; signal one is 99.1% of
+that; 2.9 submissions/s from one client; peak RSS 1,271 MB against a 512 MB
+free tier. That last number is why this is Path B.
+
 ---
 
 ## Where everything lives
@@ -248,7 +331,11 @@ your write-up; that's the deliverable.
 | `run_eval.py` | Runs your criteria three times — **unit 8** |
 | `scenarios.py` | What your test runs. **You fill this in** |
 | `criteria.md` | Your five criteria. **You write all five** |
+| `serve.py` | Deployed-mode start — **Shape A** |
+| `instrumentation.py` | Request ids, stage timing, `/metrics`, memory — **Shape A** |
+| `perf_report.py` | Turns the request log into a performance report — **Shape A** |
 | `logs/audit.jsonl` | Your audit log. **Commit it** |
+| `logs/requests.jsonl` | The operational log: one line per request, no text — **Shape A** |
 | `results/` | Attack runs and run logs. **Commit them** |
 
 ---
