@@ -306,8 +306,26 @@ python perf_report.py --probe 20      # writes results/perf_<date>.md
 ```
 
 The `-i` response carries `X-Request-ID` and a `Server-Timing` header with
-each stage's milliseconds. Every request, including 400s and 429s, adds a line
-to `logs/requests.jsonl`. **`perf_report.py --probe` writes real decisions to
+each stage's milliseconds.
+
+**Structured run log.** Every request, including 400s, 429s and crashes,
+writes one JSON record to `logs/requests.jsonl` with the same named fields:
+`timestamp`, `request_id`, `route`, `status`, `outcome`
+(`ok` / `rejected` / `rate_limited` / `error`), `duration_ms`, `input`
+(creator_id, text length, a hash and a 160-character preview), `output`
+(content_id, guess, confidence, all three scores, or the error), `stages_ms`,
+the `settings` in force (model, thresholds), and memory. A crash also records
+the `exception` (type, message, traceback) and the `failed_stage`. It's written
+even under `python app.py`, where debug mode lets the exception escape. Each
+start of `serve.py` writes a `startup` record, and a failed model load writes a
+`startup` error record. Read it back with:
+
+```bash
+python instrumentation.py --last 20               # one line per run
+python instrumentation.py --outcome error --json  # every failure, in full
+```
+
+ **`perf_report.py --probe` writes real decisions to
 `logs/audit.jsonl`** under `perf_probe_*` creator ids, so run it knowingly.
 
 **Measured on this machine** (`results/perf_2026-11-07_1223.md`, CPU only):
