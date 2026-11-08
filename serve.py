@@ -45,6 +45,8 @@ def _banner(startup: dict | None):
     print(f"  detector model:   {config.DETECTOR_MODEL}")
     if startup:
         print(f"  model load:       {startup['model_load_s']} s (before the port opened)")
+        if startup.get("first_pass_s") is not None:
+            print(f"  first gpt2 pass:  {startup['first_pass_s']} s (torch setup, paid at startup)")
     print(f"  resident memory:  {rss} MB  (free-tier budget {budget} MB"
           + (f", {'OVER' if rss > budget else 'under'} by {abs(rss - budget):.0f} MB)" if rss else ")"))
     print(f"  rate limiting:    {'ON' if config.RATE_LIMITING_ENABLED else 'off'}"

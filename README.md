@@ -1000,17 +1000,76 @@ Shape A — Deploy and instrument. I am running the system locally with full ins
 **The numbers** (`results/perf_2026-11-07_1223.md`, Windows laptop, CPU only):
 
 - Model load at startup: **10.6 s**. RSS goes from 39 MB to 383 MB.
-- `/submit` warm latency: **p50 246 ms, p95 345 ms**. The first scored request
-  after warm-up took 1.8 s while torch finished initialising.
+- `/submit` warm latency: **p50 246 ms, p95 345 ms** (short probe texts). The
+  first scored request after warm-up took 1.8 s while torch finished
+  initialising. That's fixed now; see Cost of One Run below.
 - **Signal one is 99.1% of a submission.** Signal two, combining, labelling and
   the audit write together take under 2 ms.
 - Throughput: **2.9 submissions/s** from one sequential client.
 - Peak RSS while scoring: **1,271 MB**, rising to 1,480 MB after more traffic.
-  A free tier allows **512 MB**, so the service needs about 2.5× the budget. At
-  idle it fits, but the first real request pushes it over. That's why this runs
-  as Path B: local, with logs.
+  A free tier allows **512 MB**, so the service needs about 2.5× the budget.
+  Since the warm-up now runs one gpt2 pass, it is already at **881 MB** before
+  the first request. That's why this runs as Path B: local, with logs.
 - A 13th submission from one creator within a minute returns 429 in about 2 ms,
   and that rejection appears in both logs.
+
+## Cost of One Run
+
+**The real cost is compute, not money.** Nothing here calls a paid API, so a
+run has no API spend and no billed tokens. A run costs one local gpt2 pass, so
+I measured it in **CPU-seconds and wall-clock seconds**, with gpt2 tokens read
+as the unit of work.
+
+**Average of 10 runs** (`results/cost_2026-11-08_1705.md`, produced by
+`measure_cost.py`):
+
+| Measure | Mean | SD | Min – Max |
+|---|---|---|---|
+| **CPU time per run** (summed over all cores) | **4.16 s** | 0.21 s | 3.77 – 4.56 s |
+| **Wall time per run** (server) | **1.17 s** | 0.19 s | 0.95 – 1.50 s |
+| of which signal one (gpt2) | 1.16 s (99%) | 0.18 s | 0.94 – 1.49 s |
+| Cores busy (CPU ÷ wall) | 3.6 | 0.6 | 2.8 – 4.5 |
+| gpt2 tokens read | 269 | 0 | 269 |
+| CPU per token | 15.5 ms | 0.8 ms | 14.0 – 17.0 ms |
+| Baseline `GET /health` (no model), ×10 | 0.036 s CPU | | |
+
+So one run costs about **4.2 CPU-seconds**, roughly 116× a request that runs
+no model. 1,000 runs come to about **69 CPU-minutes**, and one core-hour covers
+about **866 runs**. Everything outside signal one (validation, signal two,
+combining, labelling, the audit write) is under 1% of that.
+
+**How I measured it:**
+
+- **One run** is one `POST /submit` of the same fixed 234-word text (269 gpt2
+  tokens), sent 10 times, strictly one after another, each under its own
+  `creator_id` so the rate limit couldn't interfere. The service was started
+  with `serve.py`, so the model was already loaded and no run includes the
+  12 s load.
+- **CPU time:** the service records `time.process_time()` at the start and end
+  of every request (`instrumentation.py`, before/after-request hooks) and logs
+  the difference as `cpu_ms`. That's CPU time for the whole server process,
+  summed over every core torch used, which is why it's larger than wall time.
+  Because it's process-wide, it's only valid while requests don't overlap,
+  which is why the runs were sequential.
+- **Wall time:** `time.perf_counter()` across the same request (`duration_ms`),
+  with the `signal_one` stage timer giving gpt2's share.
+- **Tokens:** the gpt2 tokenizer's count for the text, capped at 400
+  (`model_tokens`).
+- Every number was read back from that request's record in
+  `logs/requests.jsonl` by its `X-Request-ID`. None were estimated by the script
+  or taken from a spec sheet.
+- **Machine:** Windows 11, AMD Family 23 Model 160 (8 logical CPUs, torch using
+  4 threads), Python 3.13, CPU only. The numbers belong to this machine.
+
+**What the measurement caught.** The first time I ran it
+(`results/cost_2026-11-08_1705_before_warmup_fix.md`), run 1 took **6.06 s**
+and runs 2–10 took about 1 s, even though `serve.py` had already loaded the
+model. Loading isn't the whole cost: torch does one-time setup on the first
+forward pass, and the first writer was paying for it. I changed the warm-up
+to score one throwaway sentence before the port opens. After that change, run
+1 took 1.08 s and the wall-time SD dropped from 1.59 s to 0.19 s. The cost
+moved to startup (0.35 s) along with memory: idle RSS rose from 383 MB to
+881 MB.
 
 ## What's Out of Scope
 
@@ -1019,6 +1078,11 @@ I'm not migrating to a cloud database: I am keeping the storage backend local (u
 I'm not rebuilding the user interface: I am relying entirely on JSON API endpoints and curl-based verification rather than building a graphical web front-end.
 
 I'm not adding external third-party AI APIs: I am sticking strictly to the local GPT-2 model instance rather than integrating commercial cloud-based detection services.
+
+## Instrumentation
+
+## What It Costs
+
 
 
 <!-- ═════════════════════════════════════════════════════════════════════

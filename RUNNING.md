@@ -108,6 +108,7 @@ position.**
 | `python run_eval.py --label before` | Your five criteria, three trials — **unit 8** |
 | `python serve.py` | Runs the service the deployed way: debug off, model warm, instrumented — **Shape A** |
 | `python perf_report.py --probe 20` | Sends probe traffic and writes `results/perf_<date>.md` — **Shape A** |
+| `python measure_cost.py` | Ten identical runs, one at a time; CPU-seconds, wall time and tokens per run → `results/cost_<date>.md` — **Shape A** |
 
 ---
 
@@ -261,8 +262,9 @@ PowerShell, without activating the venv:
 ```
 
 It's ready when it prints `server: ...` and `Running on http://127.0.0.1:5000`.
-Before that it loads the model (about 10–11 s) and prints the load time and
-memory. Stop it with `Ctrl+C`.
+Before that it loads the model (about 10–13 s), runs one throwaway gpt2 pass
+so the first real request doesn't pay torch's setup, and prints both times and
+the memory. Stop it with `Ctrl+C`.
 
 On Linux/macOS you can run gunicorn directly instead. Keep it at **one** worker:
 each worker holds its own copy of gpt2, and the `memory://` rate-limit store
@@ -279,7 +281,7 @@ AI201_WARMUP=1 AI201_DEBUG=0 gunicorn app:app --bind 127.0.0.1:5000 --preload --
 | Python | 3.11, 3.12 or 3.13 (not 3.14). Measured on 3.13.15 |
 | Packages | `pip install -r requirements.txt` into `.venv` |
 | Model | gpt2 already downloaded (`python detector.py` once, ~550 MB in the Hugging Face cache) |
-| Memory | **At least 1.5 GB free.** Measured: 383 MB idle after load, 1,271 MB peak while scoring, 1,480 MB after a flood |
+| Memory | **At least 1.5 GB free.** Measured: 881 MB idle after warm-up, 1,271 MB peak while scoring, 1,480 MB after a flood |
 | Disk | ~550 MB model cache, plus `logs/` (append-only, grows with traffic) |
 | Network | None at runtime. No API key, no hosted service |
 | Port | 5000 free (or set `PORT`) |

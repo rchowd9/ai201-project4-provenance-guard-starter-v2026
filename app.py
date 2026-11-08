@@ -238,6 +238,13 @@ def submit():
     if cold:
         instrumentation.note(cold_start=True)
         instrumentation.record_cold_load(time.perf_counter() - t_model)
+    # How many tokens gpt2 actually read (capped at DETECTOR_MAX_TOKENS) — the
+    # unit of work signal one costs. Counted outside the timed stage.
+    if detector._tokenizer is not None:
+        instrumentation.note(model_tokens=min(
+            len(detector._tokenizer(text, truncation=True,
+                                    max_length=config.DETECTOR_MAX_TOKENS)["input_ids"]),
+            config.DETECTOR_MAX_TOKENS))
 
     # 2. Call the style signal and combine the two
     with instrumentation.stage("signal_two"):

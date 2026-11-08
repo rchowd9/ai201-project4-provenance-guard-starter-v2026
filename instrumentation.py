@@ -197,8 +197,16 @@ def warm_up() -> dict:
 
     rss_before = rss_mb()
     start = time.perf_counter()
+    first_pass_s = None
     try:
         detector.warm_up()
+        load_s = time.perf_counter() - start
+        # Loading isn't enough: torch does one-time setup on the first forward
+        # pass (measured: a 6 s first run vs ~1 s after). Pay it here, on a
+        # throwaway sentence, instead of inside the first writer's request.
+        t_pass = time.perf_counter()
+        detector.perplexity("The service is starting up and checking that the model runs.")
+        first_pass_s = round(time.perf_counter() - t_pass, 2)
     except Exception as exc:
         # A service that couldn't start must leave a record too.
         _write({
@@ -215,16 +223,17 @@ def warm_up() -> dict:
             "pid": os.getpid(),
         })
         raise
-    _model_load_s = round(time.perf_counter() - start, 2)
+    _model_load_s = round(load_s, 2)
     rss_after = _note_rss()
 
     event = {
         "timestamp": _now(),
         "event": "startup",
         "outcome": "ok",
-        "duration_ms": round(_model_load_s * 1000, 2),
+        "duration_ms": round((time.perf_counter() - start) * 1000, 2),
         "model": config.DETECTOR_MODEL,
         "model_load_s": _model_load_s,
+        "first_pass_s": first_pass_s,
         "rss_mb_before_model": rss_before,
         "rss_mb_after_model": rss_after,
         "pid": os.getpid(),
@@ -329,6 +338,11 @@ def _record(status: int, response=None) -> dict:
     """Build the one structured record for this run (request)."""
     t0 = getattr(g, "t0", None)
     duration_ms = round((time.perf_counter() - t0) * 1000, 2) if t0 else None
+    # CPU time used by the whole process during this request, summed over all
+    # cores (torch runs gpt2 on several threads). Process-wide, so it is exact
+    # only when requests don't overlap — measure_cost.py sends them one at a time.
+    c0 = getattr(g, "cpu0", None)
+    cpu_ms = round((time.process_time() - c0) * 1000, 2) if c0 is not None else None
     route = request.url_rule.rule if request.url_rule else request.path
     stages = getattr(g, "stages", {})
 
@@ -341,6 +355,7 @@ def _record(status: int, response=None) -> dict:
         "status": status,
         "outcome": _outcome(status),
         "duration_ms": duration_ms,
+        "cpu_ms": cpu_ms,
         "input": _safe(_describe_input),
         "output": _describe_output(response) if response is not None else {"status": status},
         "stages_ms": stages,
@@ -398,6 +413,7 @@ def init_app(app):
     def _start():
         g.request_id = request.headers.get("X-Request-ID") or uuid.uuid4().hex[:12]
         g.t0 = time.perf_counter()
+        g.cpu0 = time.process_time()
         g.stages = {}
         g.ops_extra = {}
 
