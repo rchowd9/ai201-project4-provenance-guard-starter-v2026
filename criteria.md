@@ -119,3 +119,124 @@ Robust backend services must handle malformed, empty, or malicious edge-case pay
      A number you missed stays where it is, gets diagnosed, and gets a fix
      attempted. That's where the points are.
      ───────────────────────────────────────────────────────────────────────── -->
+
+---
+
+# Extension criteria — Shape A, deploy and instrument
+
+Five criteria for the extension: `serve.py`, the structured run log
+(`logs/requests.jsonl`), `/metrics`, and the cost measurement. All five are
+about the new part. Each one names how it gets checked, and the targets come
+from numbers I've already measured on this machine, so I can tell whether each
+one is reachable and still a stretch.
+
+---
+
+## 1. Every request leaves exactly one record
+
+In a mixed batch of 60 requests sent with my own `X-Request-ID` values (30
+valid submissions, the 12 malformed-request rows from the attack set, 15
+submissions from one creator so at least 3 get a `429`, and 3 appeals,
+including one with an unknown `content_id`), **60 of 60 request ids appear in
+`logs/requests.jsonl` exactly once**: 0 missing and 0 duplicated. Every record
+has a non-empty `timestamp`, `outcome`, `duration_ms`, `input` and `output`,
+and its `status` matches the status code the client received.
+
+**Why this target:** In Path B the log is the only evidence. There is no host
+dashboard to fall back on. A request with no record is invisible, and the
+README already names the worst version of that: a flood of `429`s that leaves
+no trace looks like a quiet afternoon. So the target is 100%, not 99%, because
+the one missing record is the one I'd never know to look for. Duplicates count
+as failures too, because `perf_report.py` and `measure_cost.py` average over
+the records. A doubled record skews every number and makes one request look
+like two.
+
+---
+
+## 2. When something breaks, the caller gets an answer and the log gets the cause
+
+Three forced failures:
+
+- a stage that raises mid-request (an exception injected into signal two),
+  under both `serve.py` and `python app.py` debug mode;
+- `/submit` while the model can't load (`AI201_DETECTOR_MODEL` set to a model
+  that doesn't exist);
+- `serve.py` started with that same bad model.
+
+**Each of the 4 cases must leave a record with `outcome: "error"`, the
+`exception` type and message, and (for the mid-request crash) the
+`failed_stage`.** The `/submit` case must return a JSON `503` within **30
+seconds**, not a hang or an HTML error page. The bad start must exit without
+opening the port and leave one `event: "startup"` error record.
+
+**Why this target:** This is the bad path. The interesting failure isn't the
+crash itself but a crash that leaves no record. Before I fixed it, a crash
+under `python app.py` did exactly that, because debug mode lets the exception
+escape before the after-request hook runs. Every case has to leave a record,
+because each one fails a different way. I chose 30 s for the `503` because a
+successful model load takes 10–13 s here. Failing should never take longer
+than succeeding plus a margin. A writer who waits longer than that with no
+answer will resubmit, and every retry repeats the same failure. A stricter
+limit like 5 s could fail just because the Hugging Face lookup is slow, which
+says nothing about my code. A looser one like 120 s, gunicorn's timeout,
+would count a two-minute wait as a pass.
+
+---
+
+## 3. One run costs at most 5.0 CPU-seconds and 1.5 wall-seconds
+
+Across **3 trials** of `python measure_cost.py` (10 sequential runs of the
+fixed 234-word text each, against `serve.py`), the mean CPU time per run is
+**≤ 5.0 CPU-seconds** and the mean server wall time is **≤ 1.5 s** in every
+trial.
+
+**Why this target:** The measured mean is 4.16 CPU-s (SD 0.21) and 1.17 s
+wall (SD 0.19). The targets leave about 20–30% headroom for the noise I've
+seen between runs (single runs reached 4.56 CPU-s and 1.50 s), but no more.
+A 4.0 CPU-s limit would fail on this machine's normal variation. A 10 CPU-s
+limit would pass even if every run doubled in cost, for example if someone
+raised `DETECTOR_MAX_TOKENS` from 400 to 1,024 or loaded a larger model, and
+that's the regression this should catch. Compute is the real cost of this
+system: about 866 runs per core-hour. A run that quietly costs 20% more is
+20% fewer writers served on the same machine.
+
+---
+
+## 4. The first request after startup costs no more than the rest
+
+In each of the **3 trials** above, run 1's wall time is **≤ 1.5× the median
+of runs 2–10**, measured on a freshly started `serve.py` (restarted before
+each trial).
+
+**Why this target:** This is the failure the cost measurement caught. Before
+the warm-up fix, run 1 took 6.06 s against a median of about 1.06 s, 5.7×,
+because torch's one-time setup landed in the first writer's request even
+though the model was "loaded". After the fix it was 1.08 s. I chose 1.5×
+because ordinary run-to-run spread reaches about 1.4× the median (the slowest
+normal run was 1.50 s against about 1.08 s), so 1.5× allows for that noise
+without letting the bug back in. A 2× limit would catch the original 5.7×
+problem but miss a partial regression, such as a 2-second first request, and
+that's still a writer waiting for setup that should have happened at startup.
+
+---
+
+## 5. Memory stays within the documented requirement and doesn't creep
+
+Over **100 sequential submissions** to one `serve.py` process
+(`perf_report.py --probe 100`), **peak RSS stays ≤ 1,536 MB (1.5 GB)**, and
+the mean RSS of the last 10 requests is **no more than 100 MB above** the mean
+of requests 11–20.
+
+**Why this target:** RUNNING.md tells anyone running this to have "at least
+1.5 GB free". If the service goes above that, the documented requirement is
+wrong, and on a smaller machine it gets killed partway through. The highest
+I've measured is 1,480 MB after a flood, so 1.5 GB is a real limit with only
+about 4% spare. The second number checks for memory creep (growth that never
+comes back down). Idle RSS jumped from 383 MB to 881 MB once warm-up ran a
+real pass, and rose further under traffic. Growth that levels off is fine;
+growth that keeps climbing across 100 requests is a leak, and a leak turns
+into an out-of-memory crash on a long-running local service. I start the
+comparison at requests 11–20 rather than 1–10 so the expected early growth
+from torch's buffers doesn't count as a leak. A 50 MB limit would flag normal
+allocator noise, and a 500 MB limit would let a leak run for hours before it
+showed.
