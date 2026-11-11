@@ -1071,6 +1071,99 @@ to score one throwaway sentence before the port opens. After that change, run
 moved to startup (0.35 s) along with memory: idle RSS rose from 383 MB to
 881 MB.
 
+## Extension Run Log
+
+The five extension criteria from `criteria.md`, three separate trials.
+Produced by `run_extension_eval.py --trial 1`, `--trial 2` and `--trial 3`
+(2026-11-10, 21:32–21:38), then `--summarize` →
+`results/ext_eval_2026-11-10_2138.md`. Each trial starts its own fresh server
+processes, so nothing carries over between trials.
+
+| Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
+|---|---|---|---|---|---|
+| 1. Every request leaves exactly one record | 60/60 request ids logged exactly once, statuses match, ≥ 3 × 429 | 60/60 once, 0 missing, 0 dup, 0 mismatch, 3 × 429 | 60/60 once, 0 missing, 0 dup, 0 mismatch, 3 × 429 | 60/60 once, 0 missing, 0 dup, 0 mismatch, 3 × 429 | **HELD** |
+| 2. Failures get an answer and leave their cause | 4/4 forced failures recorded with the exception; 503 JSON ≤ 30 s; bad start doesn't open the port | 4/4; 503 JSON in 6.34 s; bad start exit 1, port never opened | 4/4; 503 JSON in 7.57 s; exit 1, port never opened | 4/4; 503 JSON in 6.84 s; exit 1, port never opened | **HELD** |
+| 3. Cost of one run | mean ≤ 5.0 CPU-s and ≤ 1.5 s wall over 10 runs | 3.81 CPU-s, 0.91 s wall (p95 0.97) | 3.60 CPU-s, 0.95 s (p95 1.15) | 3.52 CPU-s, 0.99 s (p95 1.35) | **HELD** |
+| 4. No first-request penalty | run 1 ≤ 1.5 × median of runs 2–10 | 0.84 s vs 0.93 s = 0.91 × | 0.94 s vs 0.94 s = 1.00 × | 0.86 s vs 0.89 s = 0.96 × | **HELD** |
+| 5. Memory within requirement, no creep | peak ≤ 1,536 MB; last-10 mean ≤ +100 MB vs requests 11–20 | peak 3,019 MB, creep +1,512 MB | peak 3,037 MB, creep +1,526 MB | peak 3,028 MB, creep +1,520 MB | **MISSED** (3 of 3) |
+
+**What was run for each, and why that produces the number:**
+
+1. **Records.** 60 requests, each sent with its own `X-Request-ID`: 30 valid
+   submissions, the 12 malformed rows (RQ01–RQ12) from
+   `attacks_malformed_requests.csv`, 15 from one creator, 2 appeals on real
+   content_ids and 1 on an unknown id. Every id was then looked up in
+   `logs/requests.jsonl`. Status codes per trial: 46 × 200, 10 × 400, 1 × 404,
+   3 × 429. The 429s came from the 13th–15th flood requests, and every one
+   left a record.
+2. **Failures, triggered on purpose:**
+   - (a) `serve.py` with `AI201_INJECT_FAULT=signal_two`, so signal two raises
+     on every request.
+   - (b) the same fault under Flask debug mode (`flask --app app run --debug`),
+     where the exception escapes the route.
+   - (c) the service with `AI201_DETECTOR_MODEL` set to a model that doesn't
+     exist, then one `/submit`.
+   - (d) `serve.py` started with that bad model.
+
+   (a) and (b) each left one `outcome: "error"` record with
+   `exception.type = InjectedFault` and `failed_stage = signal_two`. (c)
+   returned a JSON 503 in 6.3–7.6 s with `DetectorUnavailable` in the record.
+   (d) exited with code 1 after 10–13 s, never opened the port, and left one
+   `startup` error record.
+3. **Cost.** The first 10 submissions after a fresh `serve.py`, sequential,
+   with the fixed 234-word text (269 tokens). CPU and wall time were read from
+   each request's record. Ten runs per trial give a distribution, so the p95
+   is reported alongside the mean.
+4. **First request.** The same 10 runs: run 1 against the median of runs 2–10.
+   Restarting `serve.py` for each trial is what makes run 1 a true first
+   request.
+5. **Memory.** 100 more sequential submissions to the same process, reading
+   `rss_mb` from each record. Latency over those 100 was p50 269 ms and p95
+   391 ms (trial 1).
+
+**Two changes made before the trials, so the bad path could be tested:**
+
+- **Fault injection.** I added an off-by-default switch, `AI201_INJECT_FAULT`,
+  in `instrumentation.stage`. Without it there was no way to crash a stage on
+  a real server.
+- **503 records now name the cause.** `/submit` caught `DetectorUnavailable`
+  itself and returned 503 without the exception ever reaching Flask, so the
+  record said 503 with no reason. It now records the exception before
+  returning (`instrumentation.note_exception`).
+
+**Diagnosis: criterion 5 (MISSED).** The stages are the server
+(`serve.py`'s Windows fallback, Flask's threaded server) together with signal
+one (torch).
+
+- **What the trials show.** Memory grows by about 19 MB on every request and
+  never levels off: 1,183 MB at request 1 of the 100, then 1,509, 1,894,
+  2,292 and 2,653 MB every 20 requests after that, ending at 3,019 MB. All
+  three trials are within 20 MB of each other, so it's deterministic.
+- **What I ruled out.** In one process with no server, 60 calls each of
+  stylometry, `detector.model_signal` and the full `/submit` route (through
+  Flask's test client) added 0–0.8 MB per call. Neither the scoring code nor
+  the instrumentation leaks.
+- **What reproduces it.** Running `detector.model_signal` on a new thread for
+  each call added **+19.0 MB per call**, the same rate as the server. A reused
+  pool of 4 threads added +2.5 MB per call (the first-use cost of each pool
+  thread, then flat). New threads that don't touch torch added nothing.
+- **The mechanism.** torch sets up about 19 MB of per-thread state the first
+  time a thread runs the model, and doesn't release it when the thread ends.
+  Flask's threaded server starts a new thread for every request, so each
+  submission leaves about 19 MB behind.
+- **What it means.** Process memory is unbounded. At this rate the
+  documented "1.5 GB free" is used up after roughly 35 submissions, and a
+  long-running local service would eventually be killed for running out of
+  memory.
+
+**The fix I'd make next:** run the model on threads that are reused instead
+of one per request. Either route every gpt2 call through a single dedicated
+worker thread inside `detector.py`, which also makes the 4-thread CPU use per
+run predictable, or serve with a fixed thread pool (waitress `threads=4` on
+Windows). gunicorn's threaded worker on Linux/macOS reuses its threads, so it
+probably doesn't leak like this, but I haven't measured it. The target stays
+at 1,536 MB. A number I missed doesn't get lowered.
+
 ## What's Out of Scope
 
 I'm not migrating to a cloud database: I am keeping the storage backend local (using in-memory rate limiting and a JSONL file) rather than deploying external SQL databases or distributed caches.
