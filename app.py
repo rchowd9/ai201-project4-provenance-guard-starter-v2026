@@ -233,6 +233,9 @@ def submit():
         audit.log_rejection(creator_id=str(creator_id), reason="text_too_short")
         return jsonify({"error": str(exc)}), 400
     except detector.DetectorUnavailable as exc:
+        # Handled here, so Flask never sees it — record the cause explicitly,
+        # or the run log shows a 503 with no reason.
+        instrumentation.note_exception(exc)
         audit.log_rejection(creator_id=str(creator_id), reason="detector_unavailable")
         return jsonify({"error": str(exc)}), 503
     if cold:

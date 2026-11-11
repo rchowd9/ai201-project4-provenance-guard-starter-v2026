@@ -1,0 +1,189 @@
+Loading gpt2 before opening the port…
+`loss_type=None` was set in the config but it is unrecognized. Using the default loss: `ForCausalLMLoss`.
+Provenance Guard (served) on http://127.0.0.1:5101
+  detector model:   gpt2
+  model load:       7.2 s (before the port opened)
+  first gpt2 pass:  0.25 s (torch setup, paid at startup)
+  resident memory:  883.6 MB  (free-tier budget 512 MB, OVER by 372 MB)
+  rate limiting:    ON  (12/min, 250/day)
+  audit log:        C:\Users\Home\Downloads\Prov\ai201-project4-provenance-guard-starter-v2026\logs\audit.jsonl
+  request log:      C:\Users\Home\Downloads\Prov\ai201-project4-provenance-guard-starter-v2026\logs\requests.jsonl
+  live metrics:     http://127.0.0.1:5101/metrics
+
+server: Flask threaded, debug off (gunicorn doesn't run on Windows; `pip install waitress` for a real one)
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on http://127.0.0.1:5101
+Press CTRL+C to quit
+127.0.0.1 - - [10/Nov/2026 21:36:57] "GET /health HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:36:58] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:36:59] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:00] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:01] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:02] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:03] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:03] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:05] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:06] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:07] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:08] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:08] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:09] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:09] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:09] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:10] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:10] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:10] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:11] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:12] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:12] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:13] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:13] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:13] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:14] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:14] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:14] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:15] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:15] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:16] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:16] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:16] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:17] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:17] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:17] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:18] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:18] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:18] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:19] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:19] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:19] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:20] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:20] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:20] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:21] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:21] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:21] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:21] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:22] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:22] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:23] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:23] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:23] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:23] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:24] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:24] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:24] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:25] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:25] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:26] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:26] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:26] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:27] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:27] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:27] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:28] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:28] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:28] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:28] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:29] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:29] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:29] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:30] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:30] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:30] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:30] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:31] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:31] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:31] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:32] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:32] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:32] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:33] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:33] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:33] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:33] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:34] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:34] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:34] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:35] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:35] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:35] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:35] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:36] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:36] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:36] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:37] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:37] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:37] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:37] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:38] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:38] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:38] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:39] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:39] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:39] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:39] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:40] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:40] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:40] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:41] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:41] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:41] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:42] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:42] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:42] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:43] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:43] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:43] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:44] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:44] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:44] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:44] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:45] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:45] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:45] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:46] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:46] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:46] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:47] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:47] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:47] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:48] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:48] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:48] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:48] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:49] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:49] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:49] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:50] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:50] "POST /submit HTTP/1.1" 400 -
+127.0.0.1 - - [10/Nov/2026 21:37:50] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:50] "POST /submit HTTP/1.1" 400 -
+127.0.0.1 - - [10/Nov/2026 21:37:50] "POST /submit HTTP/1.1" 400 -
+127.0.0.1 - - [10/Nov/2026 21:37:50] "POST /submit HTTP/1.1" 400 -
+127.0.0.1 - - [10/Nov/2026 21:37:50] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:50] "POST /submit HTTP/1.1" 400 -
+127.0.0.1 - - [10/Nov/2026 21:37:50] "POST /submit HTTP/1.1" 400 -
+127.0.0.1 - - [10/Nov/2026 21:37:50] "POST /submit HTTP/1.1" 400 -
+127.0.0.1 - - [10/Nov/2026 21:37:50] "POST /submit HTTP/1.1" 400 -
+127.0.0.1 - - [10/Nov/2026 21:37:50] "POST /submit HTTP/1.1" 400 -
+127.0.0.1 - - [10/Nov/2026 21:37:50] "POST /submit HTTP/1.1" 400 -
+127.0.0.1 - - [10/Nov/2026 21:37:50] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:51] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:51] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:51] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:51] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:51] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:52] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:52] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:52] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:52] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:53] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:53] "POST /submit HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:53] "POST /submit HTTP/1.1" 429 -
+127.0.0.1 - - [10/Nov/2026 21:37:53] "POST /submit HTTP/1.1" 429 -
+127.0.0.1 - - [10/Nov/2026 21:37:53] "POST /submit HTTP/1.1" 429 -
+127.0.0.1 - - [10/Nov/2026 21:37:53] "POST /appeal HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:53] "POST /appeal HTTP/1.1" 200 -
+127.0.0.1 - - [10/Nov/2026 21:37:53] "POST /appeal HTTP/1.1" 404 -

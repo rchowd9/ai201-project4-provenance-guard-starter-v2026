@@ -188,6 +188,11 @@ def stage(name: str):
             stages[name] = round(stages.get(name, 0.0) + elapsed, 2)
 
 
+def note_exception(exc: BaseException):
+    """Record an exception the route handled itself, so the record keeps the cause."""
+    _capture_exception(exc)
+
+
 def note(**fields):
     """Attach extra fields to this request's ops-log line (e.g. cold_start)."""
     extra = getattr(g, "ops_extra", None)
