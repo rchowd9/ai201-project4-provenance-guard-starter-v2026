@@ -149,6 +149,13 @@ def _note_rss() -> float | None:
 
 # ── Stage timing ─────────────────────────────────────────────────────────────
 
+_INJECT_FAULT = os.getenv("AI201_INJECT_FAULT", "").strip()
+
+
+class InjectedFault(RuntimeError):
+    """A deliberate failure, raised only when AI201_INJECT_FAULT names a stage."""
+
+
 @contextmanager
 def stage(name: str):
     """
@@ -159,9 +166,15 @@ def stage(name: str):
 
     The time is recorded even if the stage raises, so a stage that fails slowly
     still shows up as slow.
+
+    Fault injection, for testing the bad path on a real server: start the
+    service with AI201_INJECT_FAULT=<stage name> and that stage raises
+    InjectedFault on every request. Off unless the variable is set.
     """
     start = time.perf_counter()
     try:
+        if _INJECT_FAULT and name == _INJECT_FAULT:
+            raise InjectedFault(f"injected fault in stage '{name}' (AI201_INJECT_FAULT)")
         yield
     except BaseException:
         extra = getattr(g, "ops_extra", None)
