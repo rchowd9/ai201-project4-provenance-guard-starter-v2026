@@ -1087,6 +1087,249 @@ processes, so nothing carries over between trials.
 | 4. No first-request penalty | run 1 ≤ 1.5 × median of runs 2–10 | 0.84 s vs 0.93 s = 0.91 × | 0.94 s vs 0.94 s = 1.00 × | 0.86 s vs 0.89 s = 0.96 × | **HELD** |
 | 5. Memory within requirement, no creep | peak ≤ 1,536 MB; last-10 mean ≤ +100 MB vs requests 11–20 | peak 3,019 MB, creep +1,512 MB | peak 3,037 MB, creep +1,526 MB | peak 3,028 MB, creep +1,520 MB | **MISSED** (3 of 3) |
 
+**Real output from trial 1** (2026-11-10 21:32:45). The log lines below are
+copied verbatim from `logs/requests.jsonl`, one JSON object per line, as the
+service wrote them. Every request record is written by
+`instrumentation.py::init_app`: the `_finish` after-request hook builds it with
+`_record`, and the `_write_record` teardown hook appends it. The traffic and the
+console lines come from `run_extension_eval.py`. The result JSON is
+`results/ext_eval/trial1_result_2026-11-10_213245.json`, written by `run_extension_eval.py::main`.
+
+**Criterion 1: every request leaves exactly one record.** Console output from
+`run_extension_eval.py::phase_a`:
+
+```
+  C1  60/60 logged once, 0 missing, 0 dup, 3×429, status codes {'200': 46, '400': 10, '404': 1, '429': 3}
+```
+
+Four of the 60 records: an unparseable body (RQ08, rejected 400), the 12th
+flood request (last one allowed), the 13th (429), and the appeal on an unknown
+id (404):
+
+```json
+{"timestamp": "2026-11-11T02:33:49.040+00:00", "event": "request", "request_id": "ext-t1-c1m-RQ08-42016dfc", "method": "POST", "route": "/submit", "status": 400, "outcome": "rejected", "duration_ms": 1.53, "cpu_ms": 0.0, "input": {"content_type": "application/json", "bytes": 22, "raw_preview": "{\"text\": \"unterminated"}, "output": {"status": 400, "error": "Request needs JSON with a non-empty 'text' field."}, "stages_ms": {"validate": 0.0}, "settings": {"model": "gpt2", "human_threshold": 0.35, "ai_threshold": 0.72, "rate_limiting": true}, "rss_mb": 3575.9, "pid": 9480}
+{"timestamp": "2026-11-11T02:33:52.021+00:00", "event": "request", "request_id": "ext-t1-c1f-54e8af90", "method": "POST", "route": "/submit", "status": 200, "outcome": "ok", "duration_ms": 215.35, "cpu_ms": 1187.5, "input": {"content_type": "application/json", "bytes": 218, "creator_id": "ext_t1_flood", "text": {"chars": 176, "words": 33, "sha256": "b55caab4e63598c7", "preview": "Hey, just grabbed some coffee and was looking over the git logs we talked about earlier. Let me know if you want to sync up later this afternoon to review the r…"}}, "output": {"status": 200, "content_id": "fe9b0dfe-2ef3-417b-b294-bfdece5cee96", "guess": "unsure", "confidence": 0.5593, "combined_score": 0.5593, "model_score": 0.5663, "style_score": 0.5526}, "stages_ms": {"validate": 0.0, "signal_one": 207.29, "signal_two": 0.19, "combine": 0.0, "label": 0.0, "audit_write": 1.05}, "settings": {"model": "gpt2", "human_threshold": 0.35, "ai_threshold": 0.72, "rate_limiting": true}, "rss_mb": 3064.7, "pid": 9480, "text_chars": 176, "model_tokens": 36}
+{"timestamp": "2026-11-11T02:33:52.031+00:00", "event": "request", "request_id": "ext-t1-c1f-042e632e", "method": "POST", "route": "/submit", "status": 429, "outcome": "rate_limited", "duration_ms": 2.42, "cpu_ms": 0.0, "input": {"content_type": "application/json", "bytes": 218, "creator_id": "ext_t1_flood", "text": {"chars": 176, "words": 33, "sha256": "b55caab4e63598c7", "preview": "Hey, just grabbed some coffee and was looking over the git logs we talked about earlier. Let me know if you want to sync up later this afternoon to review the r…"}}, "output": {"status": 429, "error": "rate_limited", "message": "Too many submissions. Try again shortly.", "limit": "12 per 1 minute"}, "stages_ms": {}, "settings": {"model": "gpt2", "human_threshold": 0.35, "ai_threshold": 0.72, "rate_limiting": true}, "rss_mb": 3064.8, "pid": 9480}
+{"timestamp": "2026-11-11T02:33:52.237+00:00", "event": "request", "request_id": "ext-t1-c1a-1ded57be", "method": "POST", "route": "/appeal", "status": 404, "outcome": "rejected", "duration_ms": 47.96, "cpu_ms": 140.62, "input": {"content_type": "application/json", "bytes": 80, "creator_id": null, "reasoning": {"chars": 27, "words": 4, "sha256": "c02ea806473f4354", "preview": "Extension eval: unknown id."}, "content_id": "no-such-content-id"}, "output": {"status": 404, "error": "No submission found with content_id 'no-such-content-id'."}, "stages_ms": {}, "settings": {"model": "gpt2", "human_threshold": 0.35, "ai_threshold": 0.72, "rate_limiting": true}, "rss_mb": 3073.9, "pid": 9480}
+```
+
+Checks in the result file (`c1`):
+
+```json
+{
+  "sent": 60,
+  "logged_once": 60,
+  "missing": [],
+  "duplicated": [],
+  "status_mismatch": [],
+  "incomplete": [],
+  "status_counts": {
+    "200": 46,
+    "400": 10,
+    "404": 1,
+    "429": 3
+  },
+  "n_429": 3,
+  "pass": true
+}
+```
+
+**Criterion 2: failures get an answer and leave their cause.** Console output
+from `run_extension_eval.py::phase_b` (each case run by `_crash_case`):
+
+```
+  C2a PASS  {"client_status": 500, "client_content_type": "text/html; charset=utf-8", "client_s": 0.82, "records": 1, "outcome": "error", "exception_type": "InjectedFault", "exception_message": "injected fault in stage 'signal_two' (AI201_INJECT_FAULT)", "failed_stage": "signal_two"}
+  C2b PASS  {"client_status": 500, "client_content_type": "text/html; charset=utf-8", "client_s": 7.78, "records": 1, "outcome": "error", "exception_type": "InjectedFault", "exception_message": "injected fault in stage 'signal_two' (AI201_INJECT_FAULT)", "failed_stage": "signal_two"}
+  C2c PASS  {"client_status": 503, "client_content_type": "application/json", "client_s": 6.34, "records": 1, "outcome": "error", "exception_type": "DetectorUnavailable", "exception_message": "Couldn't load 'provenance-guard/no-such-model-xyz': provenance-guard/no-such-model-xyz is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'\nIf this is a private repository, make sure to pass a token having permission to this repo either by logging in with `hf auth login` or by passing `token=<your_token>`\nThe first run downloads about 550 MB \u2014 check your connection and that you have disk space free.", "failed_stage": "signal_one"}
+  C2d PASS  {"exited": true, "exit_code": 1, "seconds_to_exit": 10.04, "port_ever_open": false, "startup_error_records": 1, "exception_type": "DetectorUnavailable"}
+```
+
+The four records. (a) is the crash under `serve.py`, (b) the crash under Flask
+debug mode, (c) the 503 when the model can't load, and (d) the failed startup,
+written by `instrumentation.py::warm_up`:
+
+```json
+{"timestamp": "2026-11-11T02:34:04.682+00:00", "event": "request", "request_id": "ext-t1-crash_serve-ff3d5ab5", "method": "POST", "route": "/submit", "status": 500, "outcome": "error", "duration_ms": 811.86, "cpu_ms": 3140.62, "input": {"content_type": "application/json", "bytes": 1298, "creator_id": "ext_t1_crash_serve", "text": {"chars": 1250, "words": 234, "sha256": "397b104ab76d2c6d", "preview": "Last spring our neighbourhood started a shared garden on the empty lot behind the library. Nobody really knew what they were doing at first. We argued for a who…"}}, "output": {"status": 500}, "stages_ms": {"validate": 0.0, "signal_one": 800.56, "signal_two": 0.01}, "settings": {"model": "gpt2", "human_threshold": 0.35, "ai_threshold": 0.72, "rate_limiting": true}, "rss_mb": 978.5, "pid": 49020, "text_chars": 1250, "model_tokens": 269, "failed_stage": "signal_two", "exception": {"type": "InjectedFault", "message": "injected fault in stage 'signal_two' (AI201_INJECT_FAULT)", "traceback": ["  File \"C:\\Users\\Home\\Downloads\\Prov\\ai201-project4-provenance-guard-starter-v2026\\.venv\\Lib\\site-packages\\flask\\app.py\", line 902, in dispatch_request\n    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]\n           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^\n", "  File \"C:\\Users\\Home\\Downloads\\Prov\\ai201-project4-provenance-guard-starter-v2026\\.venv\\Lib\\site-packages\\flask_limiter\\extension.py\", line 1314, in __inner\n    return cast(R, flask.current_app.ensure_sync(obj)(*a, **k))\n                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^\n", "  File \"C:\\Users\\Home\\Downloads\\Prov\\ai201-project4-provenance-guard-starter-v2026\\app.py\", line 253, in submit\n    with instrumentation.stage(\"signal_two\"):\n         ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^\n", "  File \"C:\\Users\\Home\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\contextlib.py\", line 141, in __enter__\n    return next(self.gen)\n", "  File \"C:\\Users\\Home\\Downloads\\Prov\\ai201-project4-provenance-guard-starter-v2026\\instrumentation.py\", line 177, in stage\n    raise InjectedFault(f\"injected fault in stage '{name}' (AI201_INJECT_FAULT)\")\n", "instrumentation.InjectedFault: injected fault in stage 'signal_two' (AI201_INJECT_FAULT)\n"]}}
+{"timestamp": "2026-11-11T02:34:14.032+00:00", "event": "request", "request_id": "ext-t1-crash_debug-ac1c93a4", "method": "POST", "route": "/submit", "status": 500, "outcome": "error", "duration_ms": 7759.63, "cpu_ms": 10359.38, "input": {"content_type": "application/json", "bytes": 1298, "creator_id": "ext_t1_crash_debug", "text": {"chars": 1250, "words": 234, "sha256": "397b104ab76d2c6d", "preview": "Last spring our neighbourhood started a shared garden on the empty lot behind the library. Nobody really knew what they were doing at first. We argued for a who…"}}, "output": {"status": 500}, "stages_ms": {"validate": 0.0, "signal_one": 7754.42, "signal_two": 0.01}, "settings": {"model": "gpt2", "human_threshold": 0.35, "ai_threshold": 0.72, "rate_limiting": true}, "rss_mb": 953.8, "pid": 45988, "text_chars": 1250, "cold_start": true, "model_tokens": 269, "failed_stage": "signal_two", "exception": {"type": "InjectedFault", "message": "injected fault in stage 'signal_two' (AI201_INJECT_FAULT)", "traceback": ["  File \"C:\\Users\\Home\\Downloads\\Prov\\ai201-project4-provenance-guard-starter-v2026\\.venv\\Lib\\site-packages\\flask\\app.py\", line 902, in dispatch_request\n    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]\n           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^\n", "  File \"C:\\Users\\Home\\Downloads\\Prov\\ai201-project4-provenance-guard-starter-v2026\\.venv\\Lib\\site-packages\\flask_limiter\\extension.py\", line 1314, in __inner\n    return cast(R, flask.current_app.ensure_sync(obj)(*a, **k))\n                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^\n", "  File \"C:\\Users\\Home\\Downloads\\Prov\\ai201-project4-provenance-guard-starter-v2026\\app.py\", line 253, in submit\n    with instrumentation.stage(\"signal_two\"):\n         ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^\n", "  File \"C:\\Users\\Home\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\contextlib.py\", line 141, in __enter__\n    return next(self.gen)\n", "  File \"C:\\Users\\Home\\Downloads\\Prov\\ai201-project4-provenance-guard-starter-v2026\\instrumentation.py\", line 177, in stage\n    raise InjectedFault(f\"injected fault in stage '{name}' (AI201_INJECT_FAULT)\")\n", "instrumentation.InjectedFault: injected fault in stage 'signal_two' (AI201_INJECT_FAULT)\n"]}}
+{"timestamp": "2026-11-11T02:34:21.973+00:00", "event": "request", "request_id": "ext-t1-bad_model_submit-74372dd4", "method": "POST", "route": "/submit", "status": 503, "outcome": "error", "duration_ms": 6312.8, "cpu_ms": 6062.5, "input": {"content_type": "application/json", "bytes": 1303, "creator_id": "ext_t1_bad_model_submit", "text": {"chars": 1250, "words": 234, "sha256": "397b104ab76d2c6d", "preview": "Last spring our neighbourhood started a shared garden on the empty lot behind the library. Nobody really knew what they were doing at first. We argued for a who…"}}, "output": {"status": 503, "error": "Couldn't load 'provenance-guard/no-such-model-xyz': provenance-guard/no-such-model-xyz is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'\nIf this is a private repository, make sure to pass a token having permission to this repo either by logging in with `hf auth login` or by passing `token=<your_token>`\nThe first run downloads about 550 MB — check your connection and that you have disk space free."}, "stages_ms": {"validate": 0.01, "signal_one": 6301.45}, "settings": {"model": "provenance-guard/no-such-model-xyz", "human_threshold": 0.35, "ai_threshold": 0.72, "rate_limiting": true}, "rss_mb": 305.2, "pid": 48364, "text_chars": 1250, "failed_stage": "signal_one", "exception": {"type": "DetectorUnavailable", "message": "Couldn't load 'provenance-guard/no-such-model-xyz': provenance-guard/no-such-model-xyz is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'\nIf this is a private repository, make sure to pass a token having permission to this repo either by logging in with `hf auth login` or by passing `token=<your_token>`\nThe first run downloads about 550 MB — check your connection and that you have disk space free.", "traceback": ["  File \"C:\\Users\\Home\\Downloads\\Prov\\ai201-project4-provenance-guard-starter-v2026\\app.py\", line 231, in submit\n    model_score = detector.model_signal(text)\n", "  File \"C:\\Users\\Home\\Downloads\\Prov\\ai201-project4-provenance-guard-starter-v2026\\detector.py\", line 140, in model_signal\n    ppl = perplexity(text)\n", "  File \"C:\\Users\\Home\\Downloads\\Prov\\ai201-project4-provenance-guard-starter-v2026\\detector.py\", line 107, in perplexity\n    model, tokenizer = _load()\n                       ~~~~~^^\n", "  File \"C:\\Users\\Home\\Downloads\\Prov\\ai201-project4-provenance-guard-starter-v2026\\detector.py\", line 69, in _load\n    _model, _tokenizer = _load_unlocked()\n                         ~~~~~~~~~~~~~~^^\n", "  File \"C:\\Users\\Home\\Downloads\\Prov\\ai201-project4-provenance-guard-starter-v2026\\detector.py\", line 88, in _load_unlocked\n    raise DetectorUnavailable(\n    ...<3 lines>...\n    ) from exc\n", "detector.DetectorUnavailable: Couldn't load 'provenance-guard/no-such-model-xyz': provenance-guard/no-such-model-xyz is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'\nIf this is a private repository, make sure to pass a token having permission to this repo either by logging in with `hf auth login` or by passing `token=<your_token>`\nThe first run downloads about 550 MB — check your connection and that you have disk space free.\n"]}}
+{"timestamp": "2026-11-11T02:34:29.968+00:00", "event": "startup", "outcome": "error", "model": "provenance-guard/no-such-model-xyz", "duration_ms": 6770.69, "exception": {"type": "DetectorUnavailable", "message": "Couldn't load 'provenance-guard/no-such-model-xyz': provenance-guard/no-such-model-xyz is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'\nIf this is a private repository, make sure to pass a token having permission to this repo either by logging in with `hf auth login` or by passing `token=<your_token>`\nThe first run downloads about 550 MB — check your connection and that you have disk space free.", "traceback": ["Traceback (most recent call last):\n", "  File \"C:\\Users\\Home\\Downloads\\Prov\\ai201-project4-provenance-guard-starter-v2026\\instrumentation.py\", line 220, in warm_up\n    detector.warm_up()\n    ~~~~~~~~~~~~~~~~^^\n", "  File \"C:\\Users\\Home\\Downloads\\Prov\\ai201-project4-provenance-guard-starter-v2026\\detector.py\", line 152, in warm_up\n    _load()\n    ~~~~~^^\n", "  File \"C:\\Users\\Home\\Downloads\\Prov\\ai201-project4-provenance-guard-starter-v2026\\detector.py\", line 69, in _load\n    _model, _tokenizer = _load_unlocked()\n                         ~~~~~~~~~~~~~~^^\n", "  File \"C:\\Users\\Home\\Downloads\\Prov\\ai201-project4-provenance-guard-starter-v2026\\detector.py\", line 88, in _load_unlocked\n    raise DetectorUnavailable(\n    ...<3 lines>...\n    ) from exc\n", "detector.DetectorUnavailable: Couldn't load 'provenance-guard/no-such-model-xyz': provenance-guard/no-such-model-xyz is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'\nIf this is a private repository, make sure to pass a token having permission to this repo either by logging in with `hf auth login` or by passing `token=<your_token>`\nThe first run downloads about 550 MB — check your connection and that you have disk space free.\n"]}, "pid": 9512}
+```
+
+**Criterion 3: cost of one run.** Console output from `run_extension_eval.py::phase_a`:
+
+```
+  C3  mean CPU 3.806 s, mean wall 0.911 s
+```
+
+Result file (`c3`), the 10 runs, each read back from its record:
+
+```json
+{
+  "runs": [
+    {
+      "request_id": "ext-t1-c3-6f02c5b5",
+      "wall_ms": 842.36,
+      "cpu_ms": 3234.38,
+      "signal_one_ms": 835.02,
+      "tokens": 269,
+      "rss_mb": 977.0,
+      "client_ms": 849.46
+    },
+    {
+      "request_id": "ext-t1-c3-59598e40",
+      "wall_ms": 971.71,
+      "cpu_ms": 3968.75,
+      "signal_one_ms": 966.6,
+      "tokens": 269,
+      "rss_mb": 997.4,
+      "client_ms": 978.44
+    },
+    {
+      "request_id": "ext-t1-c3-e398b220",
+      "wall_ms": 862.45,
+      "cpu_ms": 3796.88,
+      "signal_one_ms": 857.42,
+      "tokens": 269,
+      "rss_mb": 1069.4,
+      "client_ms": 868.29
+    },
+    {
+      "request_id": "ext-t1-c3-675ccfc2",
+      "wall_ms": 929.01,
+      "cpu_ms": 3890.62,
+      "signal_one_ms": 922.86,
+      "tokens": 269,
+      "rss_mb": 1037.9,
+      "client_ms": 944.83
+    },
+    {
+      "request_id": "ext-t1-c3-167fc200",
+      "wall_ms": 854.71,
+      "cpu_ms": 3734.38,
+      "signal_one_ms": 850.26,
+      "tokens": 269,
+      "rss_mb": 1057.4,
+      "client_ms": 861.07
+    },
+    {
+      "request_id": "ext-t1-c3-1fa208ee",
+      "wall_ms": 932.1,
+      "cpu_ms": 4062.5,
+      "signal_one_ms": 926.99,
+      "tokens": 269,
+      "rss_mb": 1077.5,
+      "client_ms": 937.96
+    },
+    {
+      "request_id": "ext-t1-c3-40c02881",
+      "wall_ms": 937.84,
+      "cpu_ms": 3734.38,
+      "signal_one_ms": 932.77,
+      "tokens": 269,
+      "rss_mb": 1097.8,
+      "client_ms": 943.86
+    },
+    {
+      "request_id": "ext-t1-c3-f1dd9abe",
+      "wall_ms": 910.04,
+      "cpu_ms": 3953.12,
+      "signal_one_ms": 904.68,
+      "tokens": 269,
+      "rss_mb": 1119.0,
+      "client_ms": 916.07
+    },
+    {
+      "request_id": "ext-t1-c3-0f21c745",
+      "wall_ms": 896.35,
+      "cpu_ms": 3656.25,
+      "signal_one_ms": 890.98,
+      "tokens": 269,
+      "rss_mb": 1139.5,
+      "client_ms": 921.06
+    },
+    {
+      "request_id": "ext-t1-c3-7ec71e04",
+      "wall_ms": 969.6,
+      "cpu_ms": 4031.25,
+      "signal_one_ms": 963.56,
+      "tokens": 269,
+      "rss_mb": 1159.0,
+      "client_ms": 975.93
+    }
+  ],
+  "mean_cpu_s": 3.806,
+  "sd_cpu_s": 0.243,
+  "mean_wall_s": 0.911,
+  "sd_wall_s": 0.046,
+  "p50_wall_s": 0.91,
+  "p95_wall_s": 0.972,
+  "max_wall_s": 0.972,
+  "pass": true
+}
+```
+
+**Criterion 4: no first-request penalty.** Console output and result (`c4`):
+
+```
+  C4  run 1 0.842 s = 0.907× median
+```
+
+```json
+{
+  "run1_wall_s": 0.842,
+  "median_runs_2_10_s": 0.929,
+  "ratio": 0.907,
+  "pass": true
+}
+```
+
+Run 1's record, the first `/submit` the fresh `serve.py` received:
+
+```json
+{"timestamp": "2026-11-11T02:33:02.126+00:00", "event": "request", "request_id": "ext-t1-c3-6f02c5b5", "method": "POST", "route": "/submit", "status": 200, "outcome": "ok", "duration_ms": 842.36, "cpu_ms": 3234.38, "input": {"content_type": "application/json", "bytes": 1292, "creator_id": "ext_t1_c3_00", "text": {"chars": 1250, "words": 234, "sha256": "397b104ab76d2c6d", "preview": "Last spring our neighbourhood started a shared garden on the empty lot behind the library. Nobody really knew what they were doing at first. We argued for a who…"}}, "output": {"status": 200, "content_id": "c85add00-150b-4845-a312-f6858e811c52", "guess": "unsure", "confidence": 0.5161, "combined_score": 0.4839, "model_score": 0.501, "style_score": 0.4688}, "stages_ms": {"validate": 0.01, "signal_one": 835.02, "signal_two": 2.78, "combine": 0.02, "label": 0.01, "audit_write": 1.28}, "settings": {"model": "gpt2", "human_threshold": 0.35, "ai_threshold": 0.72, "rate_limiting": true}, "rss_mb": 977.0, "pid": 9480, "text_chars": 1250, "model_tokens": 269}
+```
+
+**Criterion 5: memory (MISSED).** Console output from `run_extension_eval.py::phase_a`:
+
+```
+  C5  peak 3019.4 MB, creep +1511.5 MB
+```
+
+Result file (`c5`), with `rss_mb` from each of the 100 records in order:
+
+```json
+{
+  "peak_rss_mb": 3019.4,
+  "first_rss_mb": 1182.7,
+  "mean_rss_req_11_20": 1414.7,
+  "mean_rss_last_10": 2926.1,
+  "creep_mb": 1511.5,
+  "statuses": {
+    "200": 100
+  },
+  "latency_ms": {
+    "p50": 268.54,
+    "p95": 390.7,
+    "max": 507.79
+  },
+  "pass": false
+}
+```
+
+`rss_series` (MB, requests 1 to 100):
+
+```
+1182.7, 1151.8, 1182.3, 1206.5, 1208.8, 1223.6, 1254.0, 1265.9, 1296.5, 1320.7, 1323.0, 1353.6, 1377.8, 1380.3, 1410.8, 1434.9, 1436.9, 1452.2, 1482.6, 1494.4, 1509.1, 1539.5, 1551.5, 1582.0, 1605.6, 1608.0, 1622.8, 1653.0, 1665.0, 1695.8, 1720.0, 1722.3, 1752.9, 1777.1, 1779.7, 1794.5, 1824.8, 1836.7, 1851.6, 1882.0, 1894.5, 1919.8, 1950.1, 1950.8, 1965.7, 1996.3, 2008.1, 2038.7, 2062.8, 2065.1, 2079.9, 2110.2, 2122.0, 2152.6, 2176.8, 2179.4, 2210.1, 2234.2, 2237.1, 2267.6, 2291.8, 2294.2, 2309.0, 2339.4, 2351.2, 2366.2, 2396.6, 2408.1, 2439.1, 2457.7, 2456.1, 2483.5, 2507.7, 2510.0, 2540.4, 2564.6, 2567.6, 2590.6, 2621.0, 2622.0, 2652.6, 2676.8, 2679.1, 2709.7, 2734.0, 2736.3, 2751.1, 2781.4, 2793.1, 2808.2, 2838.6, 2850.4, 2881.0, 2905.1, 2907.4, 2938.0, 2962.1, 2964.3, 2995.0, 3019.4
+```
+
+Request 11 and request 100 of the 100, from the same process (pid 9480).
+`rss_mb` goes from 1,323.0 to 3,019.4:
+
+```json
+{"timestamp": "2026-11-11T02:33:13.605+00:00", "event": "request", "request_id": "ext-t1-c5-9bced1a1", "method": "POST", "route": "/submit", "status": 200, "outcome": "ok", "duration_ms": 235.69, "cpu_ms": 1390.62, "input": {"content_type": "application/json", "bytes": 354, "creator_id": "ext_t1_c5_010", "text": {"chars": 311, "words": 43, "sha256": "133443edf8e1ea7c", "preview": "Artificial intelligence is transforming the way organizations operate. By automating routine tasks, it allows employees to focus on higher-value work. Furthermo…"}}, "output": {"status": 200, "content_id": "5ce7bf93-4090-4e78-ac05-31497117e8d2", "guess": "unsure", "confidence": 0.5997, "combined_score": 0.5997, "model_score": 0.8047, "style_score": 0.5375}, "stages_ms": {"validate": 0.0, "signal_one": 232.21, "signal_two": 0.24, "combine": 0.0, "label": 0.0, "audit_write": 1.07}, "settings": {"model": "gpt2", "human_threshold": 0.35, "ai_threshold": 0.72, "rate_limiting": true}, "rss_mb": 1323.0, "pid": 9480, "text_chars": 311, "model_tokens": 56}
+{"timestamp": "2026-11-11T02:33:40.042+00:00", "event": "request", "request_id": "ext-t1-c5-5b8cf862", "method": "POST", "route": "/submit", "status": 200, "outcome": "ok", "duration_ms": 194.82, "cpu_ms": 968.75, "input": {"content_type": "application/json", "bytes": 219, "creator_id": "ext_t1_c5_099", "text": {"chars": 176, "words": 33, "sha256": "b55caab4e63598c7", "preview": "Hey, just grabbed some coffee and was looking over the git logs we talked about earlier. Let me know if you want to sync up later this afternoon to review the r…"}}, "output": {"status": 200, "content_id": "afe82ce5-9522-4f17-934d-abcaf3ae633c", "guess": "unsure", "confidence": 0.5593, "combined_score": 0.5593, "model_score": 0.5663, "style_score": 0.5526}, "stages_ms": {"validate": 0.0, "signal_one": 191.6, "signal_two": 0.25, "combine": 0.01, "label": 0.0, "audit_write": 1.04}, "settings": {"model": "gpt2", "human_threshold": 0.35, "ai_threshold": 0.72, "rate_limiting": true}, "rss_mb": 3019.4, "pid": 9480, "text_chars": 176, "model_tokens": 36}
+```
+
 **What was run for each, and why that produces the number:**
 
 1. **Records.** 60 requests, each sent with its own `X-Request-ID`: 30 valid
