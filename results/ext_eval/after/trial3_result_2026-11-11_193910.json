@@ -1,0 +1,446 @@
+{
+  "c3": {
+    "runs": [
+      {
+        "request_id": "ext-t3-c3-6cfab0f0",
+        "wall_ms": 968.06,
+        "cpu_ms": 3218.75,
+        "signal_one_ms": 961.05,
+        "tokens": 269,
+        "rss_mb": 974.0,
+        "client_ms": 976.16
+      },
+      {
+        "request_id": "ext-t3-c3-e7eb18a4",
+        "wall_ms": 1136.15,
+        "cpu_ms": 3437.5,
+        "signal_one_ms": 1129.83,
+        "tokens": 269,
+        "rss_mb": 973.9,
+        "client_ms": 1144.49
+      },
+      {
+        "request_id": "ext-t3-c3-9db40c0a",
+        "wall_ms": 981.68,
+        "cpu_ms": 3328.12,
+        "signal_one_ms": 975.37,
+        "tokens": 269,
+        "rss_mb": 973.9,
+        "client_ms": 989.37
+      },
+      {
+        "request_id": "ext-t3-c3-efb5420e",
+        "wall_ms": 1038.09,
+        "cpu_ms": 3546.88,
+        "signal_one_ms": 1033.15,
+        "tokens": 269,
+        "rss_mb": 974.0,
+        "client_ms": 1043.75
+      },
+      {
+        "request_id": "ext-t3-c3-946300f9",
+        "wall_ms": 1062.53,
+        "cpu_ms": 3187.5,
+        "signal_one_ms": 1057.0,
+        "tokens": 269,
+        "rss_mb": 973.9,
+        "client_ms": 1069.6
+      },
+      {
+        "request_id": "ext-t3-c3-7491c6be",
+        "wall_ms": 914.4,
+        "cpu_ms": 3484.38,
+        "signal_one_ms": 910.07,
+        "tokens": 269,
+        "rss_mb": 974.1,
+        "client_ms": 921.59
+      },
+      {
+        "request_id": "ext-t3-c3-4a0a8f93",
+        "wall_ms": 1024.7,
+        "cpu_ms": 3453.12,
+        "signal_one_ms": 1020.67,
+        "tokens": 269,
+        "rss_mb": 973.9,
+        "client_ms": 1032.37
+      },
+      {
+        "request_id": "ext-t3-c3-1f2850b4",
+        "wall_ms": 931.23,
+        "cpu_ms": 3312.5,
+        "signal_one_ms": 925.51,
+        "tokens": 269,
+        "rss_mb": 974.2,
+        "client_ms": 936.79
+      },
+      {
+        "request_id": "ext-t3-c3-e2c29bec",
+        "wall_ms": 1054.27,
+        "cpu_ms": 3421.88,
+        "signal_one_ms": 1049.59,
+        "tokens": 269,
+        "rss_mb": 974.0,
+        "client_ms": 1059.68
+      },
+      {
+        "request_id": "ext-t3-c3-875fcbca",
+        "wall_ms": 983.09,
+        "cpu_ms": 3281.25,
+        "signal_one_ms": 974.84,
+        "tokens": 269,
+        "rss_mb": 974.0,
+        "client_ms": 990.23
+      }
+    ],
+    "mean_cpu_s": 3.367,
+    "sd_cpu_s": 0.119,
+    "mean_wall_s": 1.009,
+    "sd_wall_s": 0.067,
+    "p50_wall_s": 0.983,
+    "p95_wall_s": 1.136,
+    "max_wall_s": 1.136,
+    "pass": true
+  },
+  "c4": {
+    "run1_wall_s": 0.968,
+    "median_runs_2_10_s": 1.025,
+    "ratio": 0.945,
+    "pass": true
+  },
+  "c5": {
+    "peak_rss_mb": 981.0,
+    "first_rss_mb": 971.1,
+    "mean_rss_req_11_20": 937.4,
+    "mean_rss_last_10": 935.4,
+    "creep_mb": -2.0,
+    "rss_series": [
+      971.1,
+      981.0,
+      924.9,
+      936.3,
+      947.4,
+      925.6,
+      936.6,
+      947.3,
+      925.6,
+      936.6,
+      947.3,
+      925.6,
+      936.6,
+      947.3,
+      925.6,
+      936.6,
+      945.8,
+      925.6,
+      936.6,
+      947.3,
+      925.6,
+      936.6,
+      945.7,
+      925.6,
+      919.1,
+      930.0,
+      941.2,
+      952.6,
+      962.4,
+      925.8,
+      936.8,
+      947.6,
+      925.8,
+      936.8,
+      947.6,
+      925.8,
+      936.8,
+      947.6,
+      925.8,
+      936.8,
+      947.6,
+      925.8,
+      936.8,
+      947.6,
+      925.8,
+      936.8,
+      946.0,
+      925.8,
+      936.8,
+      947.5,
+      925.8,
+      936.8,
+      946.0,
+      925.8,
+      936.8,
+      946.0,
+      925.8,
+      936.8,
+      947.6,
+      925.8,
+      936.8,
+      947.6,
+      940.9,
+      952.5,
+      962.1,
+      925.4,
+      936.9,
+      946.7,
+      925.9,
+      936.9,
+      946.7,
+      925.9,
+      936.8,
+      946.7,
+      925.9,
+      936.8,
+      946.7,
+      925.9,
+      936.9,
+      946.7,
+      925.9,
+      936.9,
+      946.7,
+      925.9,
+      936.8,
+      946.7,
+      925.9,
+      936.8,
+      946.7,
+      925.9,
+      936.9,
+      946.7,
+      925.9,
+      936.8,
+      946.7,
+      925.9,
+      936.9,
+      935.6,
+      925.9,
+      936.9
+    ],
+    "statuses": {
+      "200": 100
+    },
+    "latency_ms": {
+      "p50": 299.64,
+      "p95": 507.93,
+      "max": 742.46
+    },
+    "pass": true
+  },
+  "c1": {
+    "sent": 60,
+    "logged_once": 60,
+    "missing": [],
+    "duplicated": [],
+    "status_mismatch": [],
+    "incomplete": [],
+    "status_counts": {
+      "200": 46,
+      "400": 10,
+      "404": 1,
+      "429": 3
+    },
+    "n_429": 3,
+    "by_kind": [
+      {
+        "kind": "malformed RQ01",
+        "status": 400,
+        "outcome": "rejected"
+      },
+      {
+        "kind": "malformed RQ02",
+        "status": 200,
+        "outcome": "ok"
+      },
+      {
+        "kind": "malformed RQ03",
+        "status": 400,
+        "outcome": "rejected"
+      },
+      {
+        "kind": "malformed RQ04",
+        "status": 400,
+        "outcome": "rejected"
+      },
+      {
+        "kind": "malformed RQ05",
+        "status": 400,
+        "outcome": "rejected"
+      },
+      {
+        "kind": "malformed RQ06",
+        "status": 200,
+        "outcome": "ok"
+      },
+      {
+        "kind": "malformed RQ07",
+        "status": 400,
+        "outcome": "rejected"
+      },
+      {
+        "kind": "malformed RQ08",
+        "status": 400,
+        "outcome": "rejected"
+      },
+      {
+        "kind": "malformed RQ09",
+        "status": 400,
+        "outcome": "rejected"
+      },
+      {
+        "kind": "malformed RQ10",
+        "status": 400,
+        "outcome": "rejected"
+      },
+      {
+        "kind": "malformed RQ11",
+        "status": 400,
+        "outcome": "rejected"
+      },
+      {
+        "kind": "malformed RQ12",
+        "status": 400,
+        "outcome": "rejected"
+      },
+      {
+        "kind": "flood",
+        "status": 200,
+        "outcome": "ok"
+      },
+      {
+        "kind": "flood",
+        "status": 200,
+        "outcome": "ok"
+      },
+      {
+        "kind": "flood",
+        "status": 200,
+        "outcome": "ok"
+      },
+      {
+        "kind": "flood",
+        "status": 200,
+        "outcome": "ok"
+      },
+      {
+        "kind": "flood",
+        "status": 200,
+        "outcome": "ok"
+      },
+      {
+        "kind": "flood",
+        "status": 200,
+        "outcome": "ok"
+      },
+      {
+        "kind": "flood",
+        "status": 200,
+        "outcome": "ok"
+      },
+      {
+        "kind": "flood",
+        "status": 200,
+        "outcome": "ok"
+      },
+      {
+        "kind": "flood",
+        "status": 200,
+        "outcome": "ok"
+      },
+      {
+        "kind": "flood",
+        "status": 200,
+        "outcome": "ok"
+      },
+      {
+        "kind": "flood",
+        "status": 200,
+        "outcome": "ok"
+      },
+      {
+        "kind": "flood",
+        "status": 200,
+        "outcome": "ok"
+      },
+      {
+        "kind": "flood",
+        "status": 429,
+        "outcome": "rate_limited"
+      },
+      {
+        "kind": "flood",
+        "status": 429,
+        "outcome": "rate_limited"
+      },
+      {
+        "kind": "flood",
+        "status": 429,
+        "outcome": "rate_limited"
+      },
+      {
+        "kind": "appeal",
+        "status": 200,
+        "outcome": "ok"
+      },
+      {
+        "kind": "appeal",
+        "status": 200,
+        "outcome": "ok"
+      },
+      {
+        "kind": "appeal unknown",
+        "status": 404,
+        "outcome": "rejected"
+      }
+    ],
+    "pass": true
+  },
+  "c2": {
+    "a_crash_serve": {
+      "client_status": 500,
+      "client_content_type": "text/html; charset=utf-8",
+      "client_s": 1.03,
+      "records": 1,
+      "outcome": "error",
+      "exception_type": "InjectedFault",
+      "exception_message": "injected fault in stage 'signal_two' (AI201_INJECT_FAULT)",
+      "failed_stage": "signal_two",
+      "pass": true
+    },
+    "b_crash_debug": {
+      "client_status": 500,
+      "client_content_type": "text/html; charset=utf-8",
+      "client_s": 9.29,
+      "records": 1,
+      "outcome": "error",
+      "exception_type": "InjectedFault",
+      "exception_message": "injected fault in stage 'signal_two' (AI201_INJECT_FAULT)",
+      "failed_stage": "signal_two",
+      "pass": true
+    },
+    "c_bad_model_submit": {
+      "client_status": 503,
+      "client_content_type": "application/json",
+      "client_s": 7.14,
+      "records": 1,
+      "outcome": "error",
+      "exception_type": "DetectorUnavailable",
+      "exception_message": "Couldn't load 'provenance-guard/no-such-model-xyz': provenance-guard/no-such-model-xyz is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'\nIf this is a private repository, make sure to pass a token having permission to this repo either by logging in with `hf auth login` or by passing `token=<your_token>`\nThe first run downloads about 550 MB \u2014 check your connection and that you have disk space free.",
+      "failed_stage": "signal_one",
+      "pass": true
+    },
+    "d_bad_model_start": {
+      "exited": true,
+      "exit_code": 1,
+      "seconds_to_exit": 10.04,
+      "port_ever_open": false,
+      "startup_error_records": 1,
+      "exception_type": "DetectorUnavailable",
+      "pass": true
+    },
+    "pass": true,
+    "cases_passed": 4
+  },
+  "trial": 3,
+  "started": "2026-11-11T19:39:10",
+  "finished": "2026-11-11T19:41:04",
+  "_file": "results/ext_eval/after/trial3_result_2026-11-11_193910.json"
+}
