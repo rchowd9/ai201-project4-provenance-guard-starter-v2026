@@ -304,3 +304,10 @@ showed.
 >
 > The target stays at 1,536 MB. The fix is to run gpt2 on threads that are
 > reused, not one per request.
+>
+> **After the improvement (unit 9, 3 more trials, `--label after`): MET.**
+> Every gpt2 pass now runs on one long-lived thread (`detector.py::perplexity`).
+> Peak 982 / 982 / 981 MB (target ≤ 1,536), and creep −1 / −1 / −2 MB
+> (target ≤ +100). The trade is that model passes now queue. With 4 submissions
+> at once, the last waited 5.59 s against 4.36 s before. Full before/after is in
+> the README's "The Improvement" section.

@@ -1421,13 +1421,105 @@ with no plateau.
   (the 10 cost runs, then request 22 of the 100). A long-running local service
   would eventually be killed for running out of memory.
 
-**The fix I'd make next:** run the model on threads that are reused instead
-of one per request. Either route every gpt2 call through a single dedicated
-worker thread inside `detector.py`, which also makes the 4-thread CPU use per
-run predictable, or serve with a fixed thread pool (waitress `threads=4` on
-Windows). gunicorn's threaded worker on Linux/macOS reuses its threads, so it
-probably doesn't leak like this, but I haven't measured it. The target stays
-at 1,536 MB. A number I missed doesn't get lowered.
+The target stays at 1,536 MB. A number I missed doesn't get lowered.
+
+### The Improvement — one long-lived thread runs every gpt2 pass
+
+**What I changed:** one thing, in `detector.py::perplexity`. Every gpt2 pass
+is now handed to a single long-lived worker thread (a one-worker
+`ThreadPoolExecutor`, threads named `gpt2-worker`) instead of running on
+whichever thread the request arrived on. Errors (`DetectorUnavailable`,
+`ValueError`) come back to the caller unchanged. The start-up warm-up pass
+goes through the same thread, so that thread's one-time torch setup is paid at
+startup and not by the first writer. Nothing else changed: same server, same
+signals, same thresholds, same harness.
+
+**Which diagnosis pointed at it:** criterion 5's. The leak was torch's
+per-thread state on threads that Flask creates fresh for every request. Making
+every model call run on one thread that's reused means that state is created
+once. I chose this over switching servers (waitress, not installed) because it
+fixes the cause wherever it shows up, under any server, and doesn't add a
+dependency.
+
+**Quick check before the trials:** I repeated the experiment that reproduced
+the leak, 40 calls each on a brand-new thread. Growth went from **+19.0 MB per
+call to +1.6 MB per call**, and the trials below show that remainder levels off.
+
+**Before and after.** The same harness, three separate trials each.
+Before: `run_extension_eval.py --trial 1/2/3` on 2026-11-10 →
+`results/ext_eval_2026-11-10_2138.md`. After: `--label after --trial 1/2/3` on
+2026-11-11 → `results/ext_eval_after_2026-11-11_1941.md`, with trial files in
+`results/ext_eval/after/`.
+
+| Criterion | Target | Before: Run 1 / 2 / 3 | Before | After: Run 1 / 2 / 3 | After |
+|---|---|---|---|---|---|
+| 1. Every request leaves exactly one record | 60/60 once, statuses match, ≥ 3 × 429 | 60/60, 60/60, 60/60; 3 × 429 each | **MET** | 60/60, 60/60, 60/60; 3 × 429 each | **MET** |
+| 2. Failures answered and recorded | 4/4; 503 JSON ≤ 30 s; bad start doesn't open port | 4/4 each; 503 in 6.34 / 7.57 / 6.84 s | **MET** | 4/4 each; 503 in 10.43 / 9.92 / 7.14 s | **MET** |
+| 3. Cost of one run | mean ≤ 5.0 CPU-s and ≤ 1.5 s wall | CPU 3.81 / 3.60 / 3.52 s; wall 0.91 / 0.95 / 0.99 s (p95 0.97 / 1.15 / 1.35) | **MET** | CPU 3.64 / 3.67 / 3.37 s; wall 1.30 / 1.40 / 1.01 s (p95 1.78 / 2.30 / 1.14) | **MET** |
+| 4. No first-request penalty | run 1 ≤ 1.5 × median of runs 2–10 | 0.91 × / 1.00 × / 0.96 × | **MET** | 1.17 × / 0.86 × / 0.94 × | **MET** |
+| 5. Memory within requirement, no creep | peak ≤ 1,536 MB; creep ≤ +100 MB | peak 3,019 / 3,037 / 3,028 MB; creep +1,512 / +1,526 / +1,520 MB | **MISSED** (3 of 3) | peak **982 / 982 / 981 MB**; creep **−1 / −1 / −2 MB** | **MET** (3 of 3) |
+
+**Real output, criterion 5, after.** Console output from
+`run_extension_eval.py::phase_a`, one line per trial
+(`results/ext_eval_after_trial{1,2,3}_console.txt`):
+
+```
+  C5  peak 981.8 MB, creep -1.2 MB
+  C5  peak 982.4 MB, creep -1.1 MB
+  C5  peak 981.0 MB, creep -2.0 MB
+```
+
+`rss_series` for trial 1 after (MB, requests 1 to 100, read from each request's
+record in `logs/requests.jsonl`;
+`results/ext_eval/after/trial1_result_2026-11-11_193422.json`). It moves in a
+925–962 MB band and finishes lower than it started. Before, it climbed from
+1,183 to 3,019 MB.
+
+```
+971.8, 981.8, 924.8, 936.2, 946.7, 925.5, 936.5, 945.7, 925.5, 936.5, 947.4, 925.5, 936.5, 947.4, 925.5, 936.5, 947.4, 925.5, 936.5, 945.7, 925.5, 936.5, 947.4, 925.5, 919.0, 930.1, 941.0, 952.2, 962.0, 925.4, 936.4, 947.1, 925.4, 936.4, 947.1, 925.4, 936.4, 947.1, 925.4, 936.4, 947.1, 925.4, 936.4, 947.1, 925.4, 936.4, 947.1, 925.4, 936.4, 947.1, 925.4, 936.4, 947.1, 925.4, 936.4, 947.1, 925.4, 936.4, 947.1, 925.4, 936.4, 947.1, 940.7, 952.0, 961.7, 925.2, 936.3, 945.5, 925.3, 936.2, 947.1, 925.3, 936.2, 947.1, 925.3, 936.3, 945.5, 925.3, 936.2, 947.1, 925.3, 936.3, 947.1, 925.3, 936.2, 945.4, 925.3, 936.3, 947.1, 925.3, 936.3, 947.2, 925.3, 936.2, 947.1, 925.3, 936.3
+```
+
+**Did it help? Yes, for the thing it was aimed at, and it cost something
+elsewhere.**
+
+- **What it fixed:** criterion 5 went from MISSED in 3 of 3 trials to MET in
+  3 of 3. Peak memory fell by about two-thirds (3,028 → 982 MB), and the
+  growth across 100 requests went from about +1,520 MB to about −1 MB. Memory
+  no longer depends on how many requests the service has served. At about
+  980 MB it's well inside RUNNING.md's "1.5 GB free", which used to be
+  exceeded at the 32nd submission. It's still nearly twice a 512 MB free
+  tier, so Path B stands.
+- **What stayed the same:** criteria 1–4 are MET before and after. CPU per run
+  is unchanged (3.37–3.67 CPU-s after, 3.52–3.81 before), so the fix didn't
+  make a run more expensive.
+- **The trade, measured:** gpt2 passes now run **one at a time**. Every
+  criterion sends requests sequentially, so none of them can see that, so I
+  measured it separately. Four submissions fired at the same moment, in one
+  process, 3 bursts each:
+
+  | 4 submissions at once | First finished | Last finished |
+  |---|---|---|
+  | Before (each request's own thread, competing for the CPU) | 3.86 s | 4.36 s |
+  | After (queued on the one model thread) | **1.45 s** | **5.59 s** |
+
+  The first writer in a burst now gets an answer 2.4 s sooner, but the last
+  waits **1.2 s longer (+28%)**. On one laptop with one model, all four were
+  already competing for the same 4 torch threads. Queuing makes that explicit
+  and makes the worst case worse. The person who pays is whoever submits last
+  in a burst.
+- **A cost I can't fully pin on the fix:** wall time in the after trials was
+  higher in two of three runs (means 1.30 and 1.40 s against 0.91–0.99 s;
+  trial 2's p95 was 2.30 s), though the third (1.01 s) matched the before
+  runs. Two things say most of that was the machine, not the change:
+  - Alternating the old path and the new path in one process, 20 times each,
+    gave medians of 1,347 ms against 1,350 ms (**+3 ms**). The means differed
+    by 73 ms because of a few slower passes.
+  - The failure cases that never touch a gpt2 pass also slowed between the two
+    days (failed startup 10–13 s → 10–18 s).
+
+  Still, criterion 3's headroom on wall time shrank. Trial 2's mean of 1.40 s
+  is 0.10 s under the 1.5 s limit, against about 0.5 s before. I'm reporting
+  it as a narrower margin, not a clean pass.
 
 ## What's Out of Scope
 
