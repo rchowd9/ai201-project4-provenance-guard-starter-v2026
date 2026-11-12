@@ -244,6 +244,10 @@ without letting the bug back in. A 2× limit would catch the original 5.7×
 problem but miss a partial regression, such as a 2-second first request, and
 that's still a writer waiting for setup that should have happened at startup.
 
+> **Result (unit 9, 3 trials): MET.** Run 1 against the median of runs 2–10:
+> 0.84 s vs 0.93 s (0.91×), 0.94 s vs 0.94 s (1.00×), and 0.86 s vs 0.89 s
+> (0.96×). All are ≤ 1.5×, on a freshly started `serve.py` each trial.
+
 ---
 
 ## 5. Memory stays within the documented requirement and doesn't creep
@@ -266,3 +270,37 @@ comparison at requests 11–20 rather than 1–10 so the expected early growth
 from torch's buffers doesn't count as a leak. A 50 MB limit would flag normal
 allocator noise, and a 500 MB limit would let a leak run for hours before it
 showed.
+
+> **Result (unit 9, 3 trials): MISSED, both parts, in all 3 trials.**
+>
+> | Trial | Peak RSS (target ≤ 1,536 MB) | Creep, last 10 vs requests 11–20 (target ≤ +100 MB) |
+> |---|---|---|
+> | 1 | 3,019 MB | +1,512 MB (1,415 → 2,926) |
+> | 2 | 3,037 MB | +1,526 MB (1,419 → 2,945) |
+> | 3 | 3,028 MB | +1,520 MB (1,420 → 2,939) |
+>
+> RSS rose on 97–98 of 99 steps, and every trial crossed 1,536 MB at request
+> 22 of the 100. The 100 submissions used `perf_report.py`'s probe texts,
+> sent by `run_extension_eval.py::phase_a` to the same process right after the
+> 10 runs for criteria 3 and 4.
+>
+> **Where:** the serving stage (`serve.py`'s Windows fallback, Flask's threaded
+> server) together with signal one (`detector.model_signal`, torch).
+>
+> **How:** Flask's threaded server starts a new thread for every request.
+> The first time a thread runs the gpt2 pass, torch sets up about 19 MB of
+> state for that thread, and doesn't release it when the thread ends. Each
+> submission leaves about 19 MB behind, so memory grows in a straight line
+> and never levels off.
+>
+> **How I know:**
+> - Without the server, 60 calls each of stylometry, `model_signal`, and the
+>   full `/submit` through Flask's test client added only 0–0.8 MB per call.
+> - Calling `model_signal` on a new thread each time added **+19.0 MB per
+>   call**.
+> - A reused pool of 4 threads added +2.5 MB per call, which is the pool
+>   threads' one-time cost.
+> - New threads that never run torch added nothing.
+>
+> The target stays at 1,536 MB. The fix is to run gpt2 on threads that are
+> reused, not one per request.

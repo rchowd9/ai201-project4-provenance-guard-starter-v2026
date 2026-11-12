@@ -1374,9 +1374,35 @@ Request 11 and request 100 of the 100, from the same process (pid 9480).
   record said 503 with no reason. It now records the exception before
   returning (`instrumentation.note_exception`).
 
-**Diagnosis: criterion 5 (MISSED).** The stages are the server
-(`serve.py`'s Windows fallback, Flask's threaded server) together with signal
-one (torch).
+**Verdicts against the targets in `criteria.md`.** A criterion is MET only
+if every part of its target held in all three trials:
+
+- **1. Every request leaves exactly one record: MET.** 60/60 in each trial,
+  with 0 missing, 0 duplicated, 0 status mismatches, 0 incomplete, and 3 × 429.
+- **2. Failures get an answer and leave their cause: MET.** 4/4 in each
+  trial. The 503 came back as JSON in 6.34, 7.57 and 6.84 s against 30 s, and
+  the bad start exited with code 1 without ever opening the port. Debug mode
+  ran as `flask --app app run --debug --no-reload` rather than
+  `python app.py`: the same debug-mode exception handling, without the
+  reloader's second process.
+- **3. Cost of one run: MET.** 3.81 / 3.60 / 3.52 CPU-s against ≤ 5.0, and
+  0.91 / 0.95 / 0.99 s wall against ≤ 1.5.
+- **4. No first-request penalty: MET.** 0.91× / 1.00× / 0.96× against ≤ 1.5×.
+- **5. Memory within the requirement, no creep: MISSED in all 3 trials, on
+  both parts.** Peak 3,019 / 3,037 / 3,028 MB against ≤ 1,536, and creep
+  +1,512 / +1,526 / +1,520 MB against ≤ +100.
+
+**Diagnosis: criterion 5 (MISSED).**
+
+**Where:** the serving stage (`serve.py`'s Windows fallback, Flask's threaded
+server) together with signal one (`detector.model_signal`, torch). Neither
+stage leaks on its own; it's the combination.
+
+**How:** Flask's threaded server handles every request on a brand-new thread.
+The first time a thread runs the gpt2 pass, torch sets up about 19 MB of state
+for that thread, and doesn't release it when the thread ends. So every
+submission leaves about 19 MB behind, and memory climbs in a straight line
+with no plateau.
 
 - **What the trials show.** Memory grows by about 19 MB on every request and
   never levels off: 1,183 MB at request 1 of the 100, then 1,509, 1,894,
@@ -1390,14 +1416,10 @@ one (torch).
   each call added **+19.0 MB per call**, the same rate as the server. A reused
   pool of 4 threads added +2.5 MB per call (the first-use cost of each pool
   thread, then flat). New threads that don't touch torch added nothing.
-- **The mechanism.** torch sets up about 19 MB of per-thread state the first
-  time a thread runs the model, and doesn't release it when the thread ends.
-  Flask's threaded server starts a new thread for every request, so each
-  submission leaves about 19 MB behind.
-- **What it means.** Process memory is unbounded. At this rate the
-  documented "1.5 GB free" is used up after roughly 35 submissions, and a
-  long-running local service would eventually be killed for running out of
-  memory.
+- **What it means.** Process memory is unbounded. In all three trials the
+  documented "1.5 GB free" was passed at the 32nd submission after startup
+  (the 10 cost runs, then request 22 of the 100). A long-running local service
+  would eventually be killed for running out of memory.
 
 **The fix I'd make next:** run the model on threads that are reused instead
 of one per request. Either route every gpt2 call through a single dedicated
