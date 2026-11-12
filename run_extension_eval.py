@@ -435,7 +435,8 @@ def summarize():
             + f" | {verdict} |")
     L += ["", "Trial files: " + ", ".join(f"`{trials[n]['_file']}`" for n in (1, 2, 3)), ""]
     report = "\n".join(L)
-    out = config.RESULTS_DIR / f"ext_eval_{dt.datetime.now():%Y-%m-%d_%H%M}.md"
+    label = OUT_DIR.name if OUT_DIR.parent.name == "ext_eval" else ""
+    out = config.RESULTS_DIR / f"ext_eval_{label + '_' if label else ''}{dt.datetime.now():%Y-%m-%d_%H%M}.md"
     out.write_text(report + "\n", encoding="utf-8")
     print(report)
     print(f"\nWrote {out.relative_to(config.ROOT)}")
@@ -445,7 +446,13 @@ def main():
     ap = argparse.ArgumentParser(description="Shape A extension criteria, one trial at a time.")
     ap.add_argument("--trial", type=int, choices=[1, 2, 3])
     ap.add_argument("--summarize", action="store_true")
+    ap.add_argument("--label", default="",
+                    help="save under results/ext_eval/<label>/ (e.g. 'after'); "
+                         "default is results/ext_eval/ itself, where the first set lives")
     args = ap.parse_args()
+    global OUT_DIR
+    if args.label:
+        OUT_DIR = config.RESULTS_DIR / "ext_eval" / args.label
     if args.summarize:
         return summarize()
     if not args.trial:
