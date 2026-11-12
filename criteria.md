@@ -151,6 +151,12 @@ as failures too, because `perf_report.py` and `measure_cost.py` average over
 the records. A doubled record skews every number and makes one request look
 like two.
 
+> **Result (unit 9, 3 trials, `run_extension_eval.py`): MET.**
+> Trial 1: 60/60 logged once, 0 missing, 0 duplicated, 0 status mismatches,
+> 0 incomplete records, 3 × 429. Trials 2 and 3: identical. All three trials
+> also had status codes 46 × 200, 10 × 400, 1 × 404, 3 × 429, and every 429
+> left a record.
+
 ---
 
 ## 2. When something breaks, the caller gets an answer and the log gets the cause
@@ -181,6 +187,19 @@ limit like 5 s could fail just because the Hugging Face lookup is slow, which
 says nothing about my code. A looser one like 120 s, gunicorn's timeout,
 would count a two-minute wait as a pass.
 
+> **Result (unit 9, 3 trials): MET.** 4/4 cases in every trial.
+> - **Crashes (a) and (b):** one `outcome: "error"` record each, with
+>   `InjectedFault`, its message, and `failed_stage: "signal_two"`.
+> - **Model can't load (c):** a JSON 503 in 6.34 s, 7.57 s and 6.84 s, all
+>   under 30 s, with `DetectorUnavailable` in the record.
+> - **Bad start (d):** exit code 1 in every trial, the port never opened, and
+>   exactly one `startup` error record.
+>
+> One difference from the wording: debug mode ran as
+> `flask --app app run --debug --no-reload`, not `python app.py`. It's the
+> same app and the same debug-mode exception handling, without the reloader's
+> second process, which the harness couldn't reliably shut down.
+
 ---
 
 ## 3. One run costs at most 5.0 CPU-seconds and 1.5 wall-seconds
@@ -199,6 +218,13 @@ raised `DETECTOR_MAX_TOKENS` from 400 to 1,024 or loaded a larger model, and
 that's the regression this should catch. Compute is the real cost of this
 system: about 866 runs per core-hour. A run that quietly costs 20% more is
 20% fewer writers served on the same machine.
+
+> **Result (unit 9, 3 trials): MET.** Mean CPU per run 3.81, 3.60 and
+> 3.52 CPU-s (all ≤ 5.0). Mean wall time 0.91, 0.95 and 0.99 s (all ≤ 1.5),
+> with p95 at 0.97, 1.15 and 1.35 s. The 10 runs used the same fixed text and
+> the same `cpu_ms`/`duration_ms` records as `measure_cost.py`, but were sent
+> by `run_extension_eval.py::phase_a` so they'd be the first requests after a
+> fresh start, which criterion 4 also needs.
 
 ---
 

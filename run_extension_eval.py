@@ -429,7 +429,7 @@ def summarize():
          "| Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |", "|---|---|---|---|---|---|"]
     for name, target, key in rows:
         passes = [trials[n][key]["pass"] for n in (1, 2, 3)]
-        verdict = "**HELD**" if all(passes) else f"**MISSED** ({passes.count(False)} of 3 trials)"
+        verdict = "**MET** (3 of 3 trials)" if all(passes) else f"**MISSED** (failed in {passes.count(False)} of 3 trials)"
         L.append(f"| {name} | {target} | " + " | ".join(
             cell(n, key) + ("" if trials[n][key]["pass"] else " ✗") for n in (1, 2, 3))
             + f" | {verdict} |")

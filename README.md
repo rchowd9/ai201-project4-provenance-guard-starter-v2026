@@ -1081,11 +1081,11 @@ processes, so nothing carries over between trials.
 
 | Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
 |---|---|---|---|---|---|
-| 1. Every request leaves exactly one record | 60/60 request ids logged exactly once, statuses match, ≥ 3 × 429 | 60/60 once, 0 missing, 0 dup, 0 mismatch, 3 × 429 | 60/60 once, 0 missing, 0 dup, 0 mismatch, 3 × 429 | 60/60 once, 0 missing, 0 dup, 0 mismatch, 3 × 429 | **HELD** |
-| 2. Failures get an answer and leave their cause | 4/4 forced failures recorded with the exception; 503 JSON ≤ 30 s; bad start doesn't open the port | 4/4; 503 JSON in 6.34 s; bad start exit 1, port never opened | 4/4; 503 JSON in 7.57 s; exit 1, port never opened | 4/4; 503 JSON in 6.84 s; exit 1, port never opened | **HELD** |
-| 3. Cost of one run | mean ≤ 5.0 CPU-s and ≤ 1.5 s wall over 10 runs | 3.81 CPU-s, 0.91 s wall (p95 0.97) | 3.60 CPU-s, 0.95 s (p95 1.15) | 3.52 CPU-s, 0.99 s (p95 1.35) | **HELD** |
-| 4. No first-request penalty | run 1 ≤ 1.5 × median of runs 2–10 | 0.84 s vs 0.93 s = 0.91 × | 0.94 s vs 0.94 s = 1.00 × | 0.86 s vs 0.89 s = 0.96 × | **HELD** |
-| 5. Memory within requirement, no creep | peak ≤ 1,536 MB; last-10 mean ≤ +100 MB vs requests 11–20 | peak 3,019 MB, creep +1,512 MB | peak 3,037 MB, creep +1,526 MB | peak 3,028 MB, creep +1,520 MB | **MISSED** (3 of 3) |
+| 1. Every request leaves exactly one record | 60/60 request ids logged exactly once, statuses match, ≥ 3 × 429 | 60/60 once, 0 missing, 0 dup, 0 mismatch, 3 × 429 | 60/60 once, 0 missing, 0 dup, 0 mismatch, 3 × 429 | 60/60 once, 0 missing, 0 dup, 0 mismatch, 3 × 429 | **MET** (3 of 3 trials) |
+| 2. Failures get an answer and leave their cause | 4/4 forced failures recorded with the exception; 503 JSON ≤ 30 s; bad start doesn't open the port | 4/4; 503 JSON in 6.34 s; bad start exit 1, port never opened | 4/4; 503 JSON in 7.57 s; exit 1, port never opened | 4/4; 503 JSON in 6.84 s; exit 1, port never opened | **MET** (3 of 3 trials) |
+| 3. Cost of one run | mean ≤ 5.0 CPU-s and ≤ 1.5 s wall over 10 runs | 3.81 CPU-s, 0.91 s wall (p95 0.97) | 3.60 CPU-s, 0.95 s (p95 1.15) | 3.52 CPU-s, 0.99 s (p95 1.35) | **MET** (3 of 3 trials) |
+| 4. No first-request penalty | run 1 ≤ 1.5 × median of runs 2–10 | 0.84 s vs 0.93 s = 0.91 × | 0.94 s vs 0.94 s = 1.00 × | 0.86 s vs 0.89 s = 0.96 × | **MET** (3 of 3 trials) |
+| 5. Memory within requirement, no creep | peak ≤ 1,536 MB; last-10 mean ≤ +100 MB vs requests 11–20 | peak 3,019 MB, creep +1,512 MB | peak 3,037 MB, creep +1,526 MB | peak 3,028 MB, creep +1,520 MB | **MISSED** (failed in 3 of 3 trials) |
 
 **Real output from trial 1** (2026-11-10 21:32:45). The log lines below are
 copied verbatim from `logs/requests.jsonl`, one JSON object per line, as the
