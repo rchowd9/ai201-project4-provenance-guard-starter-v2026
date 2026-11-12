@@ -94,6 +94,33 @@ def _load_unlocked():
     return model, tokenizer
 
 
+# ── One long-lived thread runs every gpt2 pass ───────────────────────────────
+# Unit 9 diagnosis (criterion 5): torch keeps ~19 MB of state for each OS
+# thread that has ever run the model and never frees it when the thread exits.
+# Flask's threaded server starts a NEW thread per request, so every submission
+# leaked ~19 MB. Running the model on this one reused thread means that state
+# is created once. Warm-up goes through it too, so the first real request
+# doesn't pay the per-thread setup.
+#
+# The trade: gpt2 passes now run one at a time. Two simultaneous submissions
+# queue instead of overlapping — they were already competing for the same 4
+# torch threads, but the second one now waits for the whole first pass.
+_MODEL_THREAD_PREFIX = "gpt2-worker"
+_model_executor = None
+_executor_lock = threading.Lock()
+
+
+def _executor():
+    global _model_executor
+    if _model_executor is None:
+        with _executor_lock:
+            if _model_executor is None:
+                from concurrent.futures import ThreadPoolExecutor
+                _model_executor = ThreadPoolExecutor(
+                    max_workers=1, thread_name_prefix=_MODEL_THREAD_PREFIX)
+    return _model_executor
+
+
 def perplexity(text: str) -> float:
     """
     How surprised the model is by this text. Lower means more predictable.
@@ -101,7 +128,16 @@ def perplexity(text: str) -> float:
     Returns a positive number. Typical values land roughly between 10 and 200,
     but that range shifts with topic and length, which is one reason the raw
     number isn't what you score on.
+
+    Runs on the single model thread (see above); exceptions such as
+    DetectorUnavailable and ValueError come back to the caller unchanged.
     """
+    if threading.current_thread().name.startswith(_MODEL_THREAD_PREFIX):
+        return _perplexity_on_model_thread(text)
+    return _executor().submit(_perplexity_on_model_thread, text).result()
+
+
+def _perplexity_on_model_thread(text: str) -> float:
     import torch
 
     model, tokenizer = _load()
