@@ -198,6 +198,10 @@ def main():
 
     import requests
 
+    # The Windows console is cp1252; the report uses ↳ and ×.
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
     local = threading.local()
 
     def session_factory():

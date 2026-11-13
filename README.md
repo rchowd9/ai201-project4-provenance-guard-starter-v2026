@@ -1653,7 +1653,103 @@ core for a hundred people a day.
    memory between the two phases. I'll also run 10× from a *single* writer to
    show what the rate limiter does with that.
 
-Script: `load_report.py`. Results: `results/latency_load_<date>.md`.
+Script: `load_report.py`. Results: `results/latency_load_2026-11-12_2016.md`,
+with every record in `results/latency_load_2026-11-12_2016.json`. Both parts
+ran in one go on 2026-11-12, against one freshly started `serve.py`.
+
+**A note on the machine first.** Everything ran about 2× slower than on
+2026-11-08: model load took 31.4 s (10–13 s before), and a gpt2 pass took about
+2.1–2.5 s (1.17 s before). Nothing in the gpt2 path changed except the timing
+split below, and the model load happens before any of that code runs, so that
+was the laptop that day. The *shares* and the *shape* of the load results are
+what matter here. The absolute milliseconds are from a slow day.
+
+#### Latency breakdown — where one run's time goes
+
+10 sequential runs of the 234-word text, read back from each request's record:
+
+| Part of the run | Mean ms | p95 ms | Share of server wall time |
+|---|---|---|---|
+| validate | 0.01 | 0.01 | 0.00% |
+| **signal_one (gpt2)** | **2,454.88** | 3,668.12 | **99.06%** |
+| ↳ waiting for the model thread | 0.09 | 0.12 | 0.00% |
+| ↳ gpt2 compute | 2,454.58 | 3,667.76 | 99.05% |
+| signal_two (stylometry) | 2.33 | 7.43 | 0.09% |
+| combine | 0.01 | 0.01 | 0.00% |
+| label | 0.00 | 0.01 | 0.00% |
+| audit_write | 1.87 | 3.49 | 0.08% |
+| not in any stage | 18.98 | 38.63 | 0.77% |
+| **Server wall time** | **2,478.1** | 3,704.5 | 100% |
+| Client-side extra (HTTP + JSON) | 29.39 | | |
+
+- **Everything is gpt2.** 99.05% of a run is the forward pass itself. All
+  the code I wrote (validation, stylometry, combining, labelling, the audit
+  write) adds up to 4.2 ms, under 0.2%. Making any of it faster would change
+  nothing a writer could notice.
+- **With one request at a time, nobody waits for the model thread** (0.09 ms).
+  The queue only costs anything under load, which is part 2.
+- **The largest piece outside a stage is 19 ms** (p95 39 ms). Most of it is
+  the second tokenizer pass in `app.py` that counts `model_tokens` for the log,
+  plus Flask and the instrumentation hooks. It's the one non-gpt2 cost bigger
+  than a stage, and it exists only for logging. Reusing the token count from
+  the gpt2 pass would remove it, but at 0.8% it isn't worth doing yet.
+
+#### Load observation — 10× the normal rate
+
+Normal rate = one writer at the rate limit, 12/min (0.2/s). Each phase is 60 s
+of requests sent on schedule:
+
+| | Normal | 10× (10 writers) | 10× (one writer) |
+|---|---|---|---|
+| Offered | 0.2/s (12) | 2.0/s (120) | 2.0/s (120) |
+| Status codes | 12 × 200 | 120 × 200 | 12 × 200, 108 × 429 |
+| Latency p50 / p95 / max | 2.1 / 3.5 / 3.7 s | **104.8 / 190.7 / 197.4 s** | 9.3 / 15.2 / 15.9 s |
+| Mean latency, 1st / 2nd / 3rd of the phase | 2.0 / 3.0 / 2.1 s | **41.9 / 103.2 / 163.6 s** | 3.3 / 9.0 / 14.1 s |
+| Waiting for the model thread, mean / max | 0 / 0 s | **100.7 / 195.4 s** | 7.0 / 14.2 s |
+| gpt2 compute, mean | 2.32 s | 2.14 s | 1.78 s |
+| Completed throughput | 0.20/s | **0.47/s** | 0.56/s |
+| Last answer arrived at | 57 s | **257 s** | 21 s |
+| Peak / final RSS | 962 / 910 MB | 967 / 912 MB | 965 / 964 MB |
+
+**What changed at 10×:**
+
+- **Waiting replaced computing.** gpt2 compute per run stayed the same
+  (2.32 s → 2.14 s). What grew was waiting for the one model thread, from 0 s
+  to a mean of 101 s. 98% of a writer's wait at 10× was queueing.
+- **The service hit its ceiling, and the arithmetic predicts it.** One gpt2
+  thread at about 2.14 s a pass can finish 1 ÷ 2.14 ≈ **0.47 runs/s**, which
+  is exactly the throughput measured. Normal load uses 0.2 × 2.3 ≈ 46% of that.
+  10× offers 2.0 ÷ 0.47 ≈ **4.3× what it can do**. So the backlog grew by about
+  2.0 − 0.47 ≈ 1.5 requests every second for the full minute, and latency rose
+  in a straight line through the phase (42 s → 103 s → 164 s). Clearing 120
+  requests at 0.47/s takes 120 ÷ 0.47 ≈ 255 s, and the last answer came at
+  257 s.
+- **Nothing failed, which is its own problem.** All 120 got a 200. My client
+  waited up to 10 minutes, but a real browser or proxy usually gives up well
+  before 197 s. Those writers would see a timeout and probably resubmit, which
+  adds to a queue that's already 4× over capacity. The service has no limit on
+  queue length and never says "busy, try later".
+- **Memory held.** Peak RSS was 962–967 MB in every phase, even with 120
+  request threads alive at once. That's the criterion 5 fix holding under
+  load: no thread except the one model thread ever runs torch.
+- **The rate limiter only protects against one writer, not against many.**
+  The same 2/s from a single writer got 108 × 429, each answered in about
+  21 ms. Only 12 runs reached gpt2, and the worst wait was 16 s. But ten
+  writers, each within their own limit, together got through and caused the
+  197 s wait. The per-creator limit stops one person flooding the service. It
+  does nothing about total load.
+
+**What I'd change because of this:** add a global cap on the gpt2 queue
+(e.g. 8 waiting, about 17 s at today's speed) and answer a `503` with
+`Retry-After` beyond it. A writer told "busy, try in 20 s" right away is
+better off than one who waits three minutes and gets a timeout. The trade is
+that under a burst, some writers are turned away, when today everyone
+eventually gets an answer.
+
+**Code added for this:** `detector.py::perplexity` now records how long each
+call waited for the model thread and how long the pass took, and `app.py`
+logs those as `model_queue_ms` and `model_compute_ms` on each `/submit`
+record. Scoring is unchanged.
 
 ### How I Used AI
 
