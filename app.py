@@ -238,6 +238,15 @@ def submit():
         instrumentation.note_exception(exc)
         audit.log_rejection(creator_id=str(creator_id), reason="detector_unavailable")
         return jsonify({"error": str(exc)}), 503
+    except detector.DetectorBusy as exc:
+        # Too many submissions already waiting for the model: say so now,
+        # with when to come back, instead of a multi-minute wait.
+        instrumentation.note_exception(exc)
+        instrumentation.note(model_queue_depth=exc.in_flight, retry_after_s=exc.retry_after)
+        audit.log_rejection(creator_id=str(creator_id), reason="detector_busy")
+        resp = jsonify({"error": str(exc), "retry_after_s": exc.retry_after})
+        resp.headers["Retry-After"] = str(exc.retry_after)
+        return resp, 503
     instrumentation.note(**detector.last_timing())
     if cold:
         instrumentation.note(cold_start=True)

@@ -66,9 +66,12 @@ def send(session_factory, base, creator, tag):
                                    json={"text": RUN_TEXT, "creator_id": creator},
                                    headers={"X-Request-ID": rid}, timeout=600)
         status = r.status_code
+        retry_after = r.headers.get("Retry-After")
     except Exception as exc:  # noqa: BLE001
         status = f"client error: {type(exc).__name__}"
+        retry_after = None
     return {"request_id": rid, "creator": creator, "status": status,
+            "retry_after": retry_after,
             "client_ms": (time.perf_counter() - t0) * 1000}
 
 
@@ -185,6 +188,15 @@ def summarise(phase):
         "last_done_s": last_done,
         "thirds": thirds,
         "rejected_ms_p50": pct([r["client_ms"] for r in res if r["status"] == 429], 50),
+        "busy": len([r for r in res if r["status"] == 503]),
+        "busy_ms_p50": pct([r["client_ms"] for r in res if r["status"] == 503], 50),
+        "busy_ms_max": max((r["client_ms"] for r in res if r["status"] == 503), default=None),
+        "busy_with_retry_after": len([r for r in res if r["status"] == 503 and r.get("retry_after")]),
+        "busy_logged": len([r for r in res if r["status"] == 503 and r["record"].get("status") == 503]),
+        "retry_after_values": sorted({int(r["retry_after"]) for r in res
+                                      if r["status"] == 503 and r.get("retry_after")}),
+        "all_logged": len([r for r in res if r["record"].get("status") == r["status"]]),
+        "total": len(res),
     }
 
 
@@ -194,6 +206,10 @@ def main():
     ap.add_argument("--runs", type=int, default=10)
     ap.add_argument("--seconds", type=int, default=60)
     ap.add_argument("--normal-rate", type=float, default=config.RATE_LIMIT_PER_MINUTE / 60)
+    ap.add_argument("--only-10x", action="store_true",
+                    help="run just the 10x (10 writers) phase, as one trial")
+    ap.add_argument("--label", default="", help="trial label, e.g. before / after")
+    ap.add_argument("--trial", type=int, default=0)
     args = ap.parse_args()
 
     import requests
@@ -215,6 +231,22 @@ def main():
         sys.exit(f"Service isn't answering at {args.base} ({exc}). Start it: python serve.py")
     if not health.get("detector_loaded"):
         sys.exit("Model isn't loaded. Start the service with `python serve.py`.")
+
+    if args.only_10x:
+        tag = uuid.uuid4().hex[:4]
+        phase = load_phase(args.base, "10x", args.normal_rate * 10, args.seconds,
+                           [f"load_{tag}_w{i}" for i in range(10)], session_factory)
+        summary = summarise(phase)
+        out_dir = Path("results") / "stretch"
+        out_dir.mkdir(parents=True, exist_ok=True)
+        stamp = dt.datetime.now().strftime("%Y-%m-%d_%H%M%S")
+        path = out_dir / f"{args.label}_trial{args.trial}_{stamp}.json"
+        path.write_text(json.dumps({"label": args.label, "trial": args.trial,
+                                    "summary": summary, "phase": phase}, indent=1),
+                        encoding="utf-8")
+        print(json.dumps(summary, indent=1))
+        print(f"Wrote {path}")
+        return
 
     rows = breakdown(args.base, args.runs, session_factory)
 

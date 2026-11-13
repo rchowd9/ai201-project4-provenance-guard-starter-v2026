@@ -59,6 +59,17 @@ class DetectorUnavailable(RuntimeError):
     """The model couldn't be loaded — no download yet, or no disk."""
 
 
+class DetectorBusy(RuntimeError):
+    """Too many gpt2 passes already waiting; try again in `retry_after` s."""
+
+    def __init__(self, in_flight: int, retry_after: int):
+        super().__init__(
+            f"The detector is busy ({in_flight} submissions ahead of you). "
+            f"Please try again in about {retry_after} seconds.")
+        self.in_flight = in_flight
+        self.retry_after = retry_after
+
+
 def _load():
     """Load the model once and keep it. First call downloads ~550 MB."""
     global _model, _tokenizer
@@ -136,6 +147,15 @@ def perplexity(text: str) -> float:
     if threading.current_thread().name.startswith(_MODEL_THREAD_PREFIX):
         return _perplexity_on_model_thread(text)
 
+    # Refuse up front rather than queue without limit (config.DETECTOR_QUEUE_CAP).
+    global _in_flight, _last_pass_s
+    with _queue_lock:
+        cap = config.DETECTOR_QUEUE_CAP
+        if cap and _in_flight >= cap:
+            raise DetectorBusy(_in_flight, max(1, math.ceil(_in_flight * _last_pass_s)))
+        _in_flight += 1
+        depth = _in_flight
+
     # Split the caller's wait into time queued behind other passes and time
     # spent in the pass itself, so the run log can tell them apart.
     t_submit = time.perf_counter()
@@ -145,12 +165,25 @@ def perplexity(text: str) -> float:
         result = _perplexity_on_model_thread(text)
         return result, t_start, time.perf_counter()
 
-    result, t_start, t_end = _executor().submit(_timed).result()
+    try:
+        result, t_start, t_end = _executor().submit(_timed).result()
+    finally:
+        with _queue_lock:
+            _in_flight -= 1
+    _last_pass_s = t_end - t_start
     _timing.last = {
         "model_queue_ms": round((t_start - t_submit) * 1000, 2),
         "model_compute_ms": round((t_end - t_start) * 1000, 2),
+        "model_queue_depth": depth,
     }
     return result
+
+
+# Passes waiting or running on the model thread, and the last pass's length
+# (for Retry-After). Guarded by _queue_lock.
+_queue_lock = threading.Lock()
+_in_flight = 0
+_last_pass_s = 2.0
 
 
 # Per-calling-thread record of the last pass's queue/compute split.

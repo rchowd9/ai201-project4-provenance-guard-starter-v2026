@@ -46,6 +46,12 @@ DETECTOR_MODEL = os.getenv("AI201_DETECTOR_MODEL", "gpt2")
 # 300 words, which is enough for the signal to mean something.
 DETECTOR_MAX_TOKENS = 400
 
+# Most gpt2 passes allowed to be waiting or running at once. Passes run one at
+# a time on one thread (~1–2 s each), so 8 ahead of you is a ~10–19 s wait.
+# A submission that would be 9th gets an immediate 503 + Retry-After instead
+# of a multi-minute wait. 0 turns the cap off (unbounded queue, the old way).
+DETECTOR_QUEUE_CAP = int(os.getenv("AI201_QUEUE_CAP", "8"))
+
 
 # ─── Scoring (Milestone 4) ───────────────────────────────────────────────────
 # How much each signal counts toward the combined score.
