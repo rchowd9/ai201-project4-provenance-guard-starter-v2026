@@ -1566,21 +1566,88 @@ I'm not adding external third-party AI APIs: I am sticking strictly to the local
 
 {"timestamp": "2026-11-08T22:06:27+00:00", "content_id": "1fee9510-8a26-410b-a42e-70795d30d01c", "creator_id": "cost_run_08", "guess": "unsure", "model_score": 0.501, "style_score": 0.4688, "combined_score": 0.4839, "label": "We couldn't tell whether this was written by a person or with help from an AI tool. Our checks gave mixed or weak results, which often happens with clear, plain or carefully edited writing. This is not a finding that AI was used, and it shouldn't be treated as one.", "status": "decided", "confidence": 0.5161, "thresholds": {"human_at_or_below": 0.35, "ai_at_or_above": 0.72}, "text": "Last spring our neighbourhood started a shared garden on the empty lot behind the library. Nobody really knew what they were doing at first. We argued for a whole evening about whether to build raised beds or dig straight into the ground, and in the end we did half of each because nobody would back down. The raised beds won, obviously. The soil in the lot was mostly gravel and old brick, and the carrots we planted there came up stunted and forked, like little orange hands. Mrs. Okafor, who is eighty-one and has gardened her whole life, laughed at them for a week. She brought cuttings from her own tomatoes and showed the kids how to pinch out the side shoots. By July we had more courgettes than anyone could eat, and people started leaving them on doorsteps at night like a prank. The library let us put a table out front with a sign saying take what you need. Some weeks it emptied in an hour. I think the garden mattered less for the food than for the excuse it gave people to talk. I learned the names of a dozen neighbours I had walked past for years. When the first frost came in October we pulled up the last of the beans together and somebody brought soup. We are already planning next year, and this time we are starting with compost."}
 
-## What It Costs
+## Capstone
 
-Cost Numbers (Average of 10 runs):
-CPU time per run (summed over all cores): 4.16 s
+### What It Costs
 
-Wall time per run (server): 1.17 s (99% of which was spent on signal_one / GPT-2)
+**Measured per-run number: 4.16 CPU-seconds and 1.17 s of server wall time**
+per `POST /submit` (mean of 10 runs, `results/cost_2026-11-08_1706.md`).
+99% of the wall time is signal one, the gpt2 pass. There is no API bill:
+nothing here calls a paid service, so the cost is local compute. The 30 runs
+in the after-fix trials came in a little lower (3.64 / 3.67 / 3.37 CPU-s per
+trial, mean 3.56), so 4.16 is the conservative figure I use below.
 
-Overall cost equivalent: ~4.2 CPU-seconds per run (roughly 1,000 runs ≈ 69 CPU-minutes; 1 core-hour covers ~866 runs).
+**How I measured it:**
 
-Method (How it was measured):
-Tool / Script: Measured using measure_cost.py across 10 sequential POST /submit requests using a fixed ~230-word text (269 GPT-2 tokens) so every run performed the same work under its own creator_id.
+- `measure_cost.py` sends the same fixed 234-word text (269 gpt2 tokens) to
+  `serve.py` 10 times, strictly one after another, each under its own
+  `creator_id` so the rate limit can't interfere. The model is already loaded
+  and warmed up, so no run includes the startup cost.
+- **CPU time:** `time.process_time()` at the start and end of every request
+  (`instrumentation.py` hooks), logged as `cpu_ms`. That's process-wide and
+  summed over every core torch used, which is why it's bigger than wall time
+  and why the runs had to be sequential.
+- **Wall time:** `time.perf_counter()` across the same request, logged as
+  `duration_ms`, with the `signal_one` stage timer giving gpt2's share.
+- Every number was read back from that request's own line in
+  `logs/requests.jsonl` by its `X-Request-ID`, not estimated.
+- Machine: Windows 11 laptop, 8 logical CPUs (torch using 4), CPU only.
 
-CPU Time: Recorded using time.process_time() at the start and end of every request via instrumentation.py hooks, measuring process-wide CPU time across all cores used by PyTorch.
+**A hundred people a day:** assuming one submission each, 100 × 4.16 CPU-s =
+**416 CPU-seconds ≈ 6.9 CPU-minutes a day**, which is 416 ÷ 86,400 ≈ **0.5% of
+one core** and $0 in API spend, so the real cost of running it for a hundred
+people is keeping the ~980 MB process resident all day, not the compute.
 
-Wall-Clock Time: Recorded using time.perf_counter() across the request (duration_ms), with the signal_one stage timer giving GPT-2's specific execution time.
+(For scale: 100 × 1.17 s = 117 s, about 2 minutes of server time a day. At the
+same rate one core-hour covers 3,600 ÷ 4.16 ≈ 865 runs.)
+
+### What's Still Broken
+
+All five extension criteria are MET in 3 of 3 trials after the improvement
+(`results/ext_eval_after_2026-11-11_1941.md`). So this is about which target
+was set too low.
+
+**Criterion 5's 1,536 MB peak is now too loose.** I set it before the fix,
+when the service was climbing to 3 GB, and pinned it to RUNNING.md's "1.5 GB
+free". After the fix the peak is 981–982 MB in all three trials, so the target
+has about 550 MB of slack. A regression that brought back a third of the old
+leak (+19 MB per request) would still pass for the first ~25 requests of the
+probe and only fail late, and a change that loaded a model 50% bigger would pass
+outright. I'd tighten it to **peak ≤ 1,100 MB** (982 MB plus about 12% for
+noise, roughly what the RSS series already swings within: 919–982 MB) and
+**creep ≤ +25 MB** instead of +100 MB, since the measured creep was −1 to −2 MB.
+I'd also update RUNNING.md to say "1.2 GB free" so the doc and the target agree.
+
+**Criterion 2's 30 s limit for the 503 is also looser than it needs to be.**
+The measured times were 6.34–10.43 s across six trials. I'd tighten it to
+**≤ 15 s**, which still leaves room for a slow Hugging Face lookup.
+
+### What I'd Do Next
+
+If this were real and I had another unit, the first thing I'd do is collect a
+couple of hundred pieces of real human writing from the site's actual users
+and measure the false-positive rate on them across three trials. Every
+threshold in this service was tuned on about ten pieces I picked myself, and
+a wrong accusation is the expensive mistake, so I'd want that number before
+spending anything on speed or memory, which already cost less than 1% of a
+core for a hundred people a day.
+
+### How I Used AI
+
+**Moment 1 (capstone write-up)**
+
+- *What I asked for:* Help finishing the capstone sections (What It Costs,
+  What's Still Broken, What I'd Do Next) from my own measured results, with
+  the arithmetic shown.
+- *What came back:* Drafts built from `results/cost_2026-11-08_1706.md` and
+  `results/ext_eval_after_2026-11-11_1941.md`: the 100 × 4.16 CPU-s
+  calculation, and a suggestion that criterion 5's peak target was too loose
+  after the fix and should be tightened to 1,100 MB.
+- *What I changed:* <!-- TODO: fill in what you checked, kept or rewrote -->
+
+<!-- TODO: add the other capstone moments (e.g. the memory-leak diagnosis,
+     the one-thread fix, the extension harness) in the same three-line format.
+     Only list ones that actually happened. -->
 
 
 
