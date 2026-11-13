@@ -1764,8 +1764,8 @@ requests wait for it, and the median writer waited 105 s (max 197 s) for a
   `DETECTOR_QUEUE_CAP = 8` in `config.py`. A submission that would be 9th in
   line gets an immediate JSON `503` with a `Retry-After` header (an estimate
   from the queue length × the last pass time) instead of joining the queue. It
-  leaves a run-log record with `outcome: "error"`-style status 503 and an
-  audit-log rejection with reason `detector_busy`, the same way the existing
+  leaves a run-log record (status 503, with the exception and queue depth)
+  and an audit-log rejection with reason `detector_busy`, the same way the existing
   model-unavailable `503` does. Setting `AI201_QUEUE_CAP=0` turns the cap off,
   which is exactly the behaviour before this change. That's how "before" is
   run, so both sides use the same code on the same day.
