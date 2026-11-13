@@ -1631,6 +1631,30 @@ a wrong accusation is the expensive mistake, so I'd want that number before
 spending anything on speed or memory, which already cost less than 1% of a
 core for a hundred people a day.
 
+### Extra Credit — Latency Breakdown and Load Observation
+
+**What I'm adding, before I start:**
+
+1. **A latency breakdown.** I'll send 10 sequential runs of the same fixed
+   234-word text to a freshly started `serve.py`. Then I'll read each request's
+   `stages_ms` (validate → signal_one → signal_two → combine → label →
+   audit_write) and `duration_ms` back from `logs/requests.jsonl`, and report
+   where the time goes, including any time that no stage accounts for. Since
+   the one-thread fix, `signal_one` includes time spent waiting for the model
+   thread, so I'm adding one small piece of instrumentation that splits it
+   into **queue wait** and **gpt2 compute** (`model_queue_ms`,
+   `model_compute_ms` on each record). Nothing else about scoring changes.
+2. **A load observation.** My "normal rate" is one writer submitting at the
+   rate limit: 12 submissions a minute (0.2/s). Ten times that is **2/s, 120 a
+   minute**, sent as 10 writers who are each at their own limit, so the rate
+   limiter doesn't hide the load. Each phase runs for 60 seconds on an
+   open-loop schedule (requests go out on time whether or not earlier ones
+   have finished). I'll compare latency, queue wait, throughput, errors and
+   memory between the two phases. I'll also run 10× from a *single* writer to
+   show what the rate limiter does with that.
+
+Script: `load_report.py`. Results: `results/latency_load_<date>.md`.
+
 ### How I Used AI
 
 **Moment 1 (capstone write-up)**
