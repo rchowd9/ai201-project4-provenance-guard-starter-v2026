@@ -43,6 +43,7 @@ for yourself where it lands.
 
 import math
 import threading
+import time
 
 import config
 
@@ -134,7 +135,33 @@ def perplexity(text: str) -> float:
     """
     if threading.current_thread().name.startswith(_MODEL_THREAD_PREFIX):
         return _perplexity_on_model_thread(text)
-    return _executor().submit(_perplexity_on_model_thread, text).result()
+
+    # Split the caller's wait into time queued behind other passes and time
+    # spent in the pass itself, so the run log can tell them apart.
+    t_submit = time.perf_counter()
+
+    def _timed():
+        t_start = time.perf_counter()
+        result = _perplexity_on_model_thread(text)
+        return result, t_start, time.perf_counter()
+
+    result, t_start, t_end = _executor().submit(_timed).result()
+    _timing.last = {
+        "model_queue_ms": round((t_start - t_submit) * 1000, 2),
+        "model_compute_ms": round((t_end - t_start) * 1000, 2),
+    }
+    return result
+
+
+# Per-calling-thread record of the last pass's queue/compute split.
+_timing = threading.local()
+
+
+def last_timing() -> dict:
+    """The queue/compute split of this thread's last perplexity() call, then cleared."""
+    timing = getattr(_timing, "last", None) or {}
+    _timing.last = None
+    return timing
 
 
 def _perplexity_on_model_thread(text: str) -> float:

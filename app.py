@@ -238,6 +238,7 @@ def submit():
         instrumentation.note_exception(exc)
         audit.log_rejection(creator_id=str(creator_id), reason="detector_unavailable")
         return jsonify({"error": str(exc)}), 503
+    instrumentation.note(**detector.last_timing())
     if cold:
         instrumentation.note(cold_start=True)
         instrumentation.record_cold_load(time.perf_counter() - t_model)
