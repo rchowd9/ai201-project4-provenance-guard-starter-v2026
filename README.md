@@ -1610,10 +1610,9 @@ was set too low.
 **Criterion 5's 1,536 MB peak is now too loose.** I set it before the fix,
 when the service was climbing to 3 GB, and pinned it to RUNNING.md's "1.5 GB
 free". After the fix the peak is 981–982 MB in all three trials, so the target
-has about 550 MB of slack. A regression that brought back a third of the old
-leak (+19 MB per request) would still pass for the first ~25 requests of the
-probe and only fail late, and a change that loaded a model 50% bigger would pass
-outright. I'd tighten it to **peak ≤ 1,100 MB** (982 MB plus about 12% for
+has about 550 MB of slack. The creep check would still catch a returning leak,
+but a one-time jump wouldn't be: a change that added up to 500 MB and then
+held steady, such as loading a bigger model, would pass both parts. I'd tighten it to **peak ≤ 1,100 MB** (982 MB plus about 12% for
 noise, roughly what the RSS series already swings within: 919–982 MB) and
 **creep ≤ +25 MB** instead of +100 MB, since the measured creep was −1 to −2 MB.
 I'd also update RUNNING.md to say "1.2 GB free" so the doc and the target agree.
