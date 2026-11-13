@@ -1631,7 +1631,7 @@ a wrong accusation is the expensive mistake, so I'd want that number before
 spending anything on speed or memory, which already cost less than 1% of a
 core for a hundred people a day.
 
-### Extra Credit — Latency Breakdown and Load Observation
+### Stretch — Latency Breakdown and Load Observation
 
 **What I'm adding, before I start:**
 
@@ -1750,6 +1750,43 @@ eventually gets an answer.
 call waited for the model thread and how long the pass took, and `app.py`
 logs those as `model_queue_ms` and `model_compute_ms` on each `/submit`
 record. Scoring is unchanged.
+
+### Stretch — A Second Measured Improvement: Cap the Model Queue
+
+**What I'm adding, before I start:**
+
+The load observation found the problem: at 10× the normal rate, the single
+gpt2 thread can finish only about 0.47 runs/s, nothing limits how many
+requests wait for it, and the median writer waited 105 s (max 197 s) for a
+`200` that a real browser would have given up on.
+
+- **The change (one thing):** a global cap on gpt2 passes waiting or running,
+  `DETECTOR_QUEUE_CAP = 8` in `config.py`. A submission that would be 9th in
+  line gets an immediate JSON `503` with a `Retry-After` header (an estimate
+  from the queue length × the last pass time) instead of joining the queue. It
+  leaves a run-log record with `outcome: "error"`-style status 503 and an
+  audit-log rejection with reason `detector_busy`, the same way the existing
+  model-unavailable `503` does. Setting `AI201_QUEUE_CAP=0` turns the cap off,
+  which is exactly the behaviour before this change. That's how "before" is
+  run, so both sides use the same code on the same day.
+- **Why 8:** at about 2.1 s a pass, 8 ahead of you is roughly a 17–19 s wait.
+  That stays under the 30 s I already defended in extension criterion 2 as
+  the longest a writer should wait for any answer.
+- **How it's measured, the same way as the first improvement:** 3 separate
+  trials before (cap off) and 3 after (cap on). Each trial starts a fresh
+  `serve.py` and sends the 10× load phase from `load_report.py` (120 requests
+  at 2/s from 10 writers, open loop). Every number is read back from
+  `logs/requests.jsonl` by request id.
+- **Target for this improvement, set now:** at 10×, in all 3 after-trials,
+  - p95 latency of accepted (`200`) requests ≤ **30 s**;
+  - every refused request gets its `503` in ≤ **1 s**, with `Retry-After` and
+    a log record;
+  - completed throughput stays ≥ **90%** of the before-trials' mean. The cap
+    must not make the model do less work.
+- **Regression check:** `run_extension_eval.py --label after2`, 3 trials. All
+  five extension criteria must still be MET.
+- **The trade I expect to pay:** some writers in a burst get turned away
+  ("busy, try again in N s") who today would eventually get an answer.
 
 ### How I Used AI
 
