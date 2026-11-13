@@ -1,0 +1,2864 @@
+{
+ "label": "after",
+ "trial": 3,
+ "summary": {
+  "statuses": {
+   "200": 73,
+   "503": 47
+  },
+  "ok": 73,
+  "client_p50": 6508.2052000798285,
+  "client_p95": 8490.141759975813,
+  "client_max": 8642.122599994764,
+  "queue_mean": 5386.17506849315,
+  "queue_max": 7733.12,
+  "compute_mean": 895.0854794520548,
+  "compute_p95": 1190.8120000000006,
+  "rss_peak": 1033.1,
+  "rss_last": 978.5,
+  "throughput": 1.1166743049519678,
+  "last_done_s": 65.35702889994718,
+  "thirds": [
+   4855.180874985915,
+   7007.30136250301,
+   7007.566712005064
+  ],
+  "rejected_ms_p50": null,
+  "busy": 47,
+  "busy_ms_p50": 15.118699986487627,
+  "busy_ms_max": 248.95829998422414,
+  "busy_with_retry_after": 47,
+  "busy_logged": 47,
+  "retry_after_values": [
+   7,
+   8,
+   9,
+   10,
+   11,
+   14
+  ],
+  "all_logged": 120,
+  "total": 120
+ },
+ "phase": {
+  "name": "10x",
+  "rate_per_s": 2.0,
+  "seconds": 60,
+  "writers": 10,
+  "wall_s": 65.35707609995734,
+  "results": [
+   {
+    "request_id": "load-10x-e25d4cfc",
+    "creator": "load_abc6_w0",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 877.8297000098974,
+    "sent_at_s": 2.100015990436077e-06,
+    "done_at_s": 0.8798579999711365,
+    "record": {
+     "status": 200,
+     "duration_ms": 868.91,
+     "cpu_ms": 3265.62,
+     "rss_mb": 980.8,
+     "model_queue_ms": 0.07,
+     "model_compute_ms": 860.15,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 860.61,
+      "signal_two": 2.74,
+      "combine": 0.01,
+      "label": 0.0,
+      "audit_write": 2.21
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-4234391f",
+    "creator": "load_abc6_w1",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 1282.6633000513539,
+    "sent_at_s": 0.5005124999443069,
+    "done_at_s": 1.783940099994652,
+    "record": {
+     "status": 200,
+     "duration_ms": 1273.15,
+     "cpu_ms": 4828.12,
+     "rss_mb": 980.6,
+     "model_queue_ms": 358.1,
+     "model_compute_ms": 907.75,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 1266.24,
+      "signal_two": 1.3,
+      "combine": 0.01,
+      "label": 0.0,
+      "audit_write": 2.29
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-a1affd81",
+    "creator": "load_abc6_w2",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 1766.9896999141201,
+    "sent_at_s": 1.0003851000219584,
+    "done_at_s": 2.7676435000030324,
+    "record": {
+     "status": 200,
+     "duration_ms": 1760.35,
+     "cpu_ms": 6468.75,
+     "rss_mb": 980.5,
+     "model_queue_ms": 768.35,
+     "model_compute_ms": 985.86,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 1754.49,
+      "signal_two": 1.01,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 1.8
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-a82e93f5",
+    "creator": "load_abc6_w3",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 2147.7503000060096,
+    "sent_at_s": 1.5005769999697804,
+    "done_at_s": 3.649491799995303,
+    "record": {
+     "status": 200,
+     "duration_ms": 2139.44,
+     "cpu_ms": 7890.62,
+     "rss_mb": 980.6,
+     "model_queue_ms": 1252.21,
+     "model_compute_ms": 880.41,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 2132.93,
+      "signal_two": 1.07,
+      "combine": 0.01,
+      "label": 0.0,
+      "audit_write": 2.25
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-3d93298d",
+    "creator": "load_abc6_w4",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 2665.3044999111444,
+    "sent_at_s": 2.000741499941796,
+    "done_at_s": 4.666311600012705,
+    "record": {
+     "status": 200,
+     "duration_ms": 2654.03,
+     "cpu_ms": 9609.38,
+     "rss_mb": 979.0,
+     "model_queue_ms": 1629.44,
+     "model_compute_ms": 1015.19,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 2645.14,
+      "signal_two": 1.33,
+      "combine": 0.01,
+      "label": 0.0,
+      "audit_write": 1.92
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-fcc65697",
+    "creator": "load_abc6_w5",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 3077.463799971156,
+    "sent_at_s": 2.508708699955605,
+    "done_at_s": 5.587266999995336,
+    "record": {
+     "status": 200,
+     "duration_ms": 3055.73,
+     "cpu_ms": 11218.75,
+     "rss_mb": 980.6,
+     "model_queue_ms": 2122.38,
+     "model_compute_ms": 922.07,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 3044.71,
+      "signal_two": 1.19,
+      "combine": 0.01,
+      "label": 0.0,
+      "audit_write": 1.9
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-cb8fc3d3",
+    "creator": "load_abc6_w6",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 3376.32219993975,
+    "sent_at_s": 3.00041079998482,
+    "done_at_s": 6.377064100001007,
+    "record": {
+     "status": 200,
+     "duration_ms": 3366.08,
+     "cpu_ms": 12515.62,
+     "rss_mb": 1032.4,
+     "model_queue_ms": 2568.68,
+     "model_compute_ms": 792.12,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 3361.04,
+      "signal_two": 0.78,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 1.48
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-89e41d1b",
+    "creator": "load_abc6_w7",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 3710.9221999999136,
+    "sent_at_s": 3.501161099993624,
+    "done_at_s": 7.213201900012791,
+    "record": {
+     "status": 200,
+     "duration_ms": 3703.61,
+     "cpu_ms": 13734.38,
+     "rss_mb": 981.8,
+     "model_queue_ms": 2862.49,
+     "model_compute_ms": 834.55,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 3697.45,
+      "signal_two": 0.83,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 2.02
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-da1fe166",
+    "creator": "load_abc6_w8",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 3982.2350000031292,
+    "sent_at_s": 4.000104299979284,
+    "done_at_s": 7.982526500010863,
+    "record": {
+     "status": 200,
+     "duration_ms": 3973.38,
+     "cpu_ms": 14984.38,
+     "rss_mb": 981.5,
+     "model_queue_ms": 3196.09,
+     "model_compute_ms": 770.42,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 3966.83,
+      "signal_two": 0.96,
+      "combine": 0.01,
+      "label": 0.0,
+      "audit_write": 1.83
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-615b9eb2",
+    "creator": "load_abc6_w9",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 4259.753999998793,
+    "sent_at_s": 4.500252099940553,
+    "done_at_s": 8.760803599958308,
+    "record": {
+     "status": 200,
+     "duration_ms": 4252.8,
+     "cpu_ms": 16109.38,
+     "rss_mb": 981.6,
+     "model_queue_ms": 3468.53,
+     "model_compute_ms": 778.03,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 4246.86,
+      "signal_two": 0.79,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 2.16
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-7159e786",
+    "creator": "load_abc6_w0",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 4545.926799997687,
+    "sent_at_s": 5.00039319996722,
+    "done_at_s": 9.546485199942254,
+    "record": {
+     "status": 200,
+     "duration_ms": 4537.15,
+     "cpu_ms": 17453.12,
+     "rss_mb": 1033.1,
+     "model_queue_ms": 3745.64,
+     "model_compute_ms": 785.31,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 4531.24,
+      "signal_two": 0.87,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 1.91
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-b16f6bda",
+    "creator": "load_abc6_w1",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 4880.299599957652,
+    "sent_at_s": 5.5002496999222785,
+    "done_at_s": 10.381155899958685,
+    "record": {
+     "status": 200,
+     "duration_ms": 4872.8,
+     "cpu_ms": 18765.62,
+     "rss_mb": 980.8,
+     "model_queue_ms": 4031.49,
+     "model_compute_ms": 833.89,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 4865.82,
+      "signal_two": 0.88,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 2.68
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-1cd6924f",
+    "creator": "load_abc6_w2",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 5203.551599988714,
+    "sent_at_s": 6.000445400015451,
+    "done_at_s": 11.204230699921027,
+    "record": {
+     "status": 200,
+     "duration_ms": 5196.82,
+     "cpu_ms": 20093.75,
+     "rss_mb": 1032.3,
+     "model_queue_ms": 4366.6,
+     "model_compute_ms": 824.09,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 5191.02,
+      "signal_two": 0.94,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 1.7
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-afac061e",
+    "creator": "load_abc6_w3",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 5479.35400006827,
+    "sent_at_s": 6.5004455000162125,
+    "done_at_s": 11.979992599925026,
+    "record": {
+     "status": 200,
+     "duration_ms": 5472.24,
+     "cpu_ms": 21093.75,
+     "rss_mb": 981.2,
+     "model_queue_ms": 4690.69,
+     "model_compute_ms": 776.31,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 5467.23,
+      "signal_two": 0.76,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 1.7
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-a31c087a",
+    "creator": "load_abc6_w4",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 5781.449100002646,
+    "sent_at_s": 7.000450999941677,
+    "done_at_s": 12.782534099998884,
+    "record": {
+     "status": 200,
+     "duration_ms": 5773.94,
+     "cpu_ms": 22343.75,
+     "rss_mb": 982.1,
+     "model_queue_ms": 4965.61,
+     "model_compute_ms": 801.39,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 5767.3,
+      "signal_two": 1.11,
+      "combine": 0.01,
+      "label": 0.0,
+      "audit_write": 2.08
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-5d125dac",
+    "creator": "load_abc6_w5",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 6284.564099973068,
+    "sent_at_s": 7.500304399989545,
+    "done_at_s": 13.785084199975245,
+    "record": {
+     "status": 200,
+     "duration_ms": 6278.12,
+     "cpu_ms": 23843.75,
+     "rss_mb": 980.6,
+     "model_queue_ms": 5268.93,
+     "model_compute_ms": 1003.45,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 6272.62,
+      "signal_two": 0.78,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 1.89
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-4b72ccc4",
+    "creator": "load_abc6_w6",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 6664.757600054145,
+    "sent_at_s": 8.000247000018135,
+    "done_at_s": 14.66538329992909,
+    "record": {
+     "status": 200,
+     "duration_ms": 6639.58,
+     "cpu_ms": 24875.0,
+     "rss_mb": 980.8,
+     "model_queue_ms": 5754.16,
+     "model_compute_ms": 879.98,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 6634.43,
+      "signal_two": 0.85,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 1.6
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-0d4ce2e3",
+    "creator": "load_abc6_w7",
+    "status": 503,
+    "retry_after": "7",
+    "client_ms": 13.292900053784251,
+    "sent_at_s": 8.50063909997698,
+    "done_at_s": 8.514887899975292,
+    "record": {
+     "status": 503,
+     "duration_ms": 4.93,
+     "cpu_ms": 78.12,
+     "rss_mb": 937.4,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 0.05
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-8f3b038d",
+    "creator": "load_abc6_w8",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 6491.905699949712,
+    "sent_at_s": 9.000104399980046,
+    "done_at_s": 15.492261699982919,
+    "record": {
+     "status": 200,
+     "duration_ms": 6484.5,
+     "cpu_ms": 24375.0,
+     "rss_mb": 980.5,
+     "model_queue_ms": 5653.64,
+     "model_compute_ms": 825.48,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 6479.4,
+      "signal_two": 0.78,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 2.08
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-ac357361",
+    "creator": "load_abc6_w9",
+    "status": 503,
+    "retry_after": "7",
+    "client_ms": 21.188099985010922,
+    "sent_at_s": 9.500584700028412,
+    "done_at_s": 9.52201509999577,
+    "record": {
+     "status": 503,
+     "duration_ms": 4.09,
+     "cpu_ms": 0.0,
+     "rss_mb": 986.3,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 0.03
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-10526873",
+    "creator": "load_abc6_w0",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 6353.298699948937,
+    "sent_at_s": 10.000244499999098,
+    "done_at_s": 16.353771999944,
+    "record": {
+     "status": 200,
+     "duration_ms": 6343.48,
+     "cpu_ms": 23843.75,
+     "rss_mb": 981.4,
+     "model_queue_ms": 5475.4,
+     "model_compute_ms": 860.23,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 6336.0,
+      "signal_two": 1.36,
+      "combine": 0.01,
+      "label": 0.01,
+      "audit_write": 2.0
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-d6b4037a",
+    "creator": "load_abc6_w1",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 7108.337900019251,
+    "sent_at_s": 10.500530199962668,
+    "done_at_s": 17.60925189999398,
+    "record": {
+     "status": 200,
+     "duration_ms": 7099.93,
+     "cpu_ms": 25625.0,
+     "rss_mb": 979.1,
+     "model_queue_ms": 5837.43,
+     "model_compute_ms": 1255.78,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 7093.53,
+      "signal_two": 1.4,
+      "combine": 0.01,
+      "label": 0.0,
+      "audit_write": 1.62
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-5ccf3b5e",
+    "creator": "load_abc6_w2",
+    "status": 503,
+    "retry_after": "7",
+    "client_ms": 14.161500032059848,
+    "sent_at_s": 11.000202400027774,
+    "done_at_s": 11.014509900007397,
+    "record": {
+     "status": 503,
+     "duration_ms": 5.2,
+     "cpu_ms": 78.12,
+     "rss_mb": 983.7,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 0.03
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-670c573d",
+    "creator": "load_abc6_w3",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 7083.293200004846,
+    "sent_at_s": 11.500256099971011,
+    "done_at_s": 18.58372390002478,
+    "record": {
+     "status": 200,
+     "duration_ms": 7049.94,
+     "cpu_ms": 25171.88,
+     "rss_mb": 979.9,
+     "model_queue_ms": 6069.01,
+     "model_compute_ms": 974.17,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 7043.48,
+      "signal_two": 1.17,
+      "combine": 0.01,
+      "label": 0.0,
+      "audit_write": 1.72
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-8b288440",
+    "creator": "load_abc6_w4",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 7678.1265999889,
+    "sent_at_s": 12.00028439995367,
+    "done_at_s": 19.67863869993016,
+    "record": {
+     "status": 200,
+     "duration_ms": 7653.42,
+     "cpu_ms": 26703.12,
+     "rss_mb": 980.8,
+     "model_queue_ms": 6557.9,
+     "model_compute_ms": 1082.15,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 7644.97,
+      "signal_two": 2.82,
+      "combine": 0.01,
+      "label": 0.0,
+      "audit_write": 1.66
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-7c1276c3",
+    "creator": "load_abc6_w5",
+    "status": 503,
+    "retry_after": "7",
+    "client_ms": 15.064200037159026,
+    "sent_at_s": 12.50036970002111,
+    "done_at_s": 12.515609900001436,
+    "record": {
+     "status": 503,
+     "duration_ms": 4.47,
+     "cpu_ms": 78.12,
+     "rss_mb": 937.1,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 0.03
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-ea600534",
+    "creator": "load_abc6_w6",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 7785.87639995385,
+    "sent_at_s": 13.007105699973181,
+    "done_at_s": 20.79340319999028,
+    "record": {
+     "status": 200,
+     "duration_ms": 7761.84,
+     "cpu_ms": 26781.25,
+     "rss_mb": 980.7,
+     "model_queue_ms": 6642.1,
+     "model_compute_ms": 1105.94,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 7748.36,
+      "signal_two": 1.32,
+      "combine": 0.01,
+      "label": 0.0,
+      "audit_write": 7.2
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-5fb878d1",
+    "creator": "load_abc6_w7",
+    "status": 503,
+    "retry_after": "7",
+    "client_ms": 15.118699986487627,
+    "sent_at_s": 13.500270499964245,
+    "done_at_s": 13.515581600018777,
+    "record": {
+     "status": 503,
+     "duration_ms": 5.69,
+     "cpu_ms": 78.12,
+     "rss_mb": 946.2,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 0.03
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-36988dac",
+    "creator": "load_abc6_w8",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 8036.364999949001,
+    "sent_at_s": 14.000467299949378,
+    "done_at_s": 22.037031800020486,
+    "record": {
+     "status": 200,
+     "duration_ms": 8028.71,
+     "cpu_ms": 26937.5,
+     "rss_mb": 979.9,
+     "model_queue_ms": 6756.39,
+     "model_compute_ms": 1265.91,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 8022.56,
+      "signal_two": 1.36,
+      "combine": 0.01,
+      "label": 0.0,
+      "audit_write": 1.83
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-dad09065",
+    "creator": "load_abc6_w9",
+    "status": 503,
+    "retry_after": "9",
+    "client_ms": 11.12069992814213,
+    "sent_at_s": 14.500456399982795,
+    "done_at_s": 14.511796499951743,
+    "record": {
+     "status": 503,
+     "duration_ms": 3.56,
+     "cpu_ms": 15.62,
+     "rss_mb": 986.3,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 0.02
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-4bee6dee",
+    "creator": "load_abc6_w0",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 8028.688000049442,
+    "sent_at_s": 15.000516599975526,
+    "done_at_s": 23.02939789998345,
+    "record": {
+     "status": 200,
+     "duration_ms": 8018.09,
+     "cpu_ms": 26859.38,
+     "rss_mb": 985.9,
+     "model_queue_ms": 7022.46,
+     "model_compute_ms": 983.91,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 8006.64,
+      "signal_two": 1.37,
+      "combine": 0.01,
+      "label": 0.0,
+      "audit_write": 6.43
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-32b185a6",
+    "creator": "load_abc6_w1",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 8576.067199930549,
+    "sent_at_s": 15.500291700009257,
+    "done_at_s": 24.07653510000091,
+    "record": {
+     "status": 200,
+     "duration_ms": 8563.82,
+     "cpu_ms": 28578.12,
+     "rss_mb": 979.2,
+     "model_queue_ms": 7503.24,
+     "model_compute_ms": 1052.67,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 8556.2,
+      "signal_two": 1.36,
+      "combine": 0.01,
+      "label": 0.0,
+      "audit_write": 2.17
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-003e109e",
+    "creator": "load_abc6_w2",
+    "status": 503,
+    "retry_after": "7",
+    "client_ms": 20.908699952997267,
+    "sent_at_s": 16.000458299997263,
+    "done_at_s": 16.021589700016193,
+    "record": {
+     "status": 503,
+     "duration_ms": 5.01,
+     "cpu_ms": 78.12,
+     "rss_mb": 933.8,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 0.03
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-35985085",
+    "creator": "load_abc6_w3",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 8614.475500071421,
+    "sent_at_s": 16.54049829998985,
+    "done_at_s": 25.155319100013003,
+    "record": {
+     "status": 200,
+     "duration_ms": 8583.74,
+     "cpu_ms": 28500.0,
+     "rss_mb": 980.9,
+     "model_queue_ms": 7477.91,
+     "model_compute_ms": 1078.93,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 8557.08,
+      "signal_two": 2.33,
+      "combine": 0.01,
+      "label": 0.01,
+      "audit_write": 2.86
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-fb767021",
+    "creator": "load_abc6_w4",
+    "status": 503,
+    "retry_after": "7",
+    "client_ms": 14.50479996856302,
+    "sent_at_s": 17.000472699990496,
+    "done_at_s": 17.015164599986747,
+    "record": {
+     "status": 503,
+     "duration_ms": 5.46,
+     "cpu_ms": 62.5,
+     "rss_mb": 930.0,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 0.03
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-896d1e6f",
+    "creator": "load_abc6_w5",
+    "status": 503,
+    "retry_after": "7",
+    "client_ms": 17.987400060519576,
+    "sent_at_s": 17.500424099969678,
+    "done_at_s": 17.518657699925825,
+    "record": {
+     "status": 503,
+     "duration_ms": 6.36,
+     "cpu_ms": 62.5,
+     "rss_mb": 985.4,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 0.03
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-93319720",
+    "creator": "load_abc6_w6",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 8195.073700044304,
+    "sent_at_s": 18.00046669994481,
+    "done_at_s": 26.195893399999477,
+    "record": {
+     "status": 200,
+     "duration_ms": 8188.6,
+     "cpu_ms": 27093.75,
+     "rss_mb": 980.6,
+     "model_queue_ms": 7137.47,
+     "model_compute_ms": 1044.54,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 8182.27,
+      "signal_two": 0.88,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 1.72
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-8c7f107d",
+    "creator": "load_abc6_w7",
+    "status": 503,
+    "retry_after": "11",
+    "client_ms": 15.549200004898012,
+    "sent_at_s": 18.500257699983194,
+    "done_at_s": 18.516011100029573,
+    "record": {
+     "status": 503,
+     "duration_ms": 7.22,
+     "cpu_ms": 62.5,
+     "rss_mb": 985.4,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 0.03
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-54fcd22f",
+    "creator": "load_abc6_w8",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 8022.731699980795,
+    "sent_at_s": 19.0001119999215,
+    "done_at_s": 27.023053399985656,
+    "record": {
+     "status": 200,
+     "duration_ms": 7998.15,
+     "cpu_ms": 26906.25,
+     "rss_mb": 981.7,
+     "model_queue_ms": 7164.31,
+     "model_compute_ms": 827.97,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 7992.48,
+      "signal_two": 0.78,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 1.6
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-194c59eb",
+    "creator": "load_abc6_w9",
+    "status": 503,
+    "retry_after": "8",
+    "client_ms": 23.146399995312095,
+    "sent_at_s": 19.50033650000114,
+    "done_at_s": 19.52372880000621,
+    "record": {
+     "status": 503,
+     "duration_ms": 12.5,
+     "cpu_ms": 31.25,
+     "rss_mb": 985.6,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 0.05
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-6455f3e7",
+    "creator": "load_abc6_w0",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 7774.464399903081,
+    "sent_at_s": 20.00041219999548,
+    "done_at_s": 27.77506659994833,
+    "record": {
+     "status": 200,
+     "duration_ms": 7768.04,
+     "cpu_ms": 26546.88,
+     "rss_mb": 981.7,
+     "model_queue_ms": 7010.14,
+     "model_compute_ms": 751.94,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 7762.27,
+      "signal_two": 0.84,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 1.78
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-f259b038",
+    "creator": "load_abc6_w1",
+    "status": 503,
+    "retry_after": "9",
+    "client_ms": 12.254699948243797,
+    "sent_at_s": 20.500244299997576,
+    "done_at_s": 20.512730599963106,
+    "record": {
+     "status": 503,
+     "duration_ms": 3.9,
+     "cpu_ms": 31.25,
+     "rss_mb": 985.4,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 0.04
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-3a59bc98",
+    "creator": "load_abc6_w2",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 7613.536200020462,
+    "sent_at_s": 21.000312199932523,
+    "done_at_s": 28.614041800028645,
+    "record": {
+     "status": 200,
+     "duration_ms": 7601.49,
+     "cpu_ms": 26546.88,
+     "rss_mb": 982.0,
+     "model_queue_ms": 6758.47,
+     "model_compute_ms": 836.14,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 7594.93,
+      "signal_two": 1.06,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 1.76
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-e8964a5f",
+    "creator": "load_abc6_w3",
+    "status": 503,
+    "retry_after": "9",
+    "client_ms": 29.914399958215654,
+    "sent_at_s": 21.500561799970455,
+    "done_at_s": 21.530704799923114,
+    "record": {
+     "status": 503,
+     "duration_ms": 5.56,
+     "cpu_ms": 46.88,
+     "rss_mb": 933.1,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 0.04
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-1466463c",
+    "creator": "load_abc6_w4",
+    "status": 503,
+    "retry_after": "9",
+    "client_ms": 23.55159993749112,
+    "sent_at_s": 22.00049849995412,
+    "done_at_s": 22.024267399916425,
+    "record": {
+     "status": 503,
+     "duration_ms": 4.93,
+     "cpu_ms": 0.0,
+     "rss_mb": 1035.0,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 0.05
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-a2f31d4b",
+    "creator": "load_abc6_w5",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 6928.371099987999,
+    "sent_at_s": 22.500148899969645,
+    "done_at_s": 29.428741700015962,
+    "record": {
+     "status": 200,
+     "duration_ms": 6921.18,
+     "cpu_ms": 24843.75,
+     "rss_mb": 1032.1,
+     "model_queue_ms": 6097.7,
+     "model_compute_ms": 816.68,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 6914.67,
+      "signal_two": 0.98,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 1.77
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-b0592cd6",
+    "creator": "load_abc6_w6",
+    "status": 503,
+    "retry_after": "11",
+    "client_ms": 20.839500008150935,
+    "sent_at_s": 23.00056970003061,
+    "done_at_s": 23.021964899962768,
+    "record": {
+     "status": 503,
+     "duration_ms": 3.5,
+     "cpu_ms": 78.12,
+     "rss_mb": 985.4,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 0.02
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-c7430b86",
+    "creator": "load_abc6_w7",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 6726.5272999648005,
+    "sent_at_s": 23.500394799979404,
+    "done_at_s": 30.22709479997866,
+    "record": {
+     "status": 200,
+     "duration_ms": 6719.21,
+     "cpu_ms": 24500.0,
+     "rss_mb": 980.7,
+     "model_queue_ms": 5914.91,
+     "model_compute_ms": 799.05,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 6714.19,
+      "signal_two": 0.99,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 1.34
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-ddb4c46a",
+    "creator": "load_abc6_w8",
+    "status": 503,
+    "retry_after": "8",
+    "client_ms": 18.93380004912615,
+    "sent_at_s": 24.000698199961334,
+    "done_at_s": 24.019849699921906,
+    "record": {
+     "status": 503,
+     "duration_ms": 10.16,
+     "cpu_ms": 62.5,
+     "rss_mb": 985.5,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 0.03
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-c92ba16d",
+    "creator": "load_abc6_w9",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 6697.870300034992,
+    "sent_at_s": 24.500581500004046,
+    "done_at_s": 31.199065399938263,
+    "record": {
+     "status": 200,
+     "duration_ms": 6690.38,
+     "cpu_ms": 24296.88,
+     "rss_mb": 978.3,
+     "model_queue_ms": 5713.68,
+     "model_compute_ms": 970.06,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 6684.11,
+      "signal_two": 1.38,
+      "combine": 0.01,
+      "label": 0.0,
+      "audit_write": 1.65
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-64999d0c",
+    "creator": "load_abc6_w0",
+    "status": 503,
+    "retry_after": "9",
+    "client_ms": 33.077299944125116,
+    "sent_at_s": 25.000387799926102,
+    "done_at_s": 25.033883100026287,
+    "record": {
+     "status": 503,
+     "duration_ms": 9.4,
+     "cpu_ms": 31.25,
+     "rss_mb": 985.6,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 0.04
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-be692430",
+    "creator": "load_abc6_w1",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 6766.37990004383,
+    "sent_at_s": 25.500465899938717,
+    "done_at_s": 32.267063300008886,
+    "record": {
+     "status": 200,
+     "duration_ms": 6757.9,
+     "cpu_ms": 24843.75,
+     "rss_mb": 979.3,
+     "model_queue_ms": 5684.16,
+     "model_compute_ms": 1066.53,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 6751.06,
+      "signal_two": 1.23,
+      "combine": 0.01,
+      "label": 0.0,
+      "audit_write": 2.67
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-b2146a44",
+    "creator": "load_abc6_w2",
+    "status": 503,
+    "retry_after": "9",
+    "client_ms": 10.46180003322661,
+    "sent_at_s": 26.00061609991826,
+    "done_at_s": 26.011353299953043,
+    "record": {
+     "status": 503,
+     "duration_ms": 3.41,
+     "cpu_ms": 31.25,
+     "rss_mb": 985.3,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 0.03
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-cf3d897d",
+    "creator": "load_abc6_w3",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 6667.798800044693,
+    "sent_at_s": 26.500297399936244,
+    "done_at_s": 33.1683086999692,
+    "record": {
+     "status": 200,
+     "duration_ms": 6659.66,
+     "cpu_ms": 24812.5,
+     "rss_mb": 980.1,
+     "model_queue_ms": 5751.84,
+     "model_compute_ms": 902.41,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 6654.55,
+      "signal_two": 0.88,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 1.54
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-72839425",
+    "creator": "load_abc6_w4",
+    "status": 503,
+    "retry_after": "9",
+    "client_ms": 12.99980003386736,
+    "sent_at_s": 27.000640099984594,
+    "done_at_s": 27.013918999931775,
+    "record": {
+     "status": 503,
+     "duration_ms": 4.74,
+     "cpu_ms": 78.12,
+     "rss_mb": 1023.6,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 0.03
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-8a0d4e2e",
+    "creator": "load_abc6_w5",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 6515.347099979408,
+    "sent_at_s": 27.50021869991906,
+    "done_at_s": 34.01579829992261,
+    "record": {
+     "status": 200,
+     "duration_ms": 6507.32,
+     "cpu_ms": 24500.0,
+     "rss_mb": 980.2,
+     "model_queue_ms": 5652.81,
+     "model_compute_ms": 846.41,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 6499.46,
+      "signal_two": 1.06,
+      "combine": 0.02,
+      "label": 0.0,
+      "audit_write": 4.16
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-c3d894ec",
+    "creator": "load_abc6_w6",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 6866.09370005317,
+    "sent_at_s": 28.000201000017114,
+    "done_at_s": 34.866486600018106,
+    "record": {
+     "status": 200,
+     "duration_ms": 6858.88,
+     "cpu_ms": 25609.38,
+     "rss_mb": 980.1,
+     "model_queue_ms": 6000.41,
+     "model_compute_ms": 852.46,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 6853.35,
+      "signal_two": 1.21,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 1.73
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-d798bfdb",
+    "creator": "load_abc6_w7",
+    "status": 503,
+    "retry_after": "7",
+    "client_ms": 30.98779998254031,
+    "sent_at_s": 28.50036619999446,
+    "done_at_s": 28.53153839998413,
+    "record": {
+     "status": 503,
+     "duration_ms": 4.92,
+     "cpu_ms": 78.12,
+     "rss_mb": 986.9,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 0.03
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-5cec61d0",
+    "creator": "load_abc6_w8",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 6619.707999983802,
+    "sent_at_s": 29.000432599917985,
+    "done_at_s": 35.620361499954015,
+    "record": {
+     "status": 200,
+     "duration_ms": 6610.87,
+     "cpu_ms": 24843.75,
+     "rss_mb": 980.3,
+     "model_queue_ms": 5851.65,
+     "model_compute_ms": 750.11,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 6603.41,
+      "signal_two": 1.13,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 2.87
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-e08ecf72",
+    "creator": "load_abc6_w9",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 6907.293000025675,
+    "sent_at_s": 29.500567300012335,
+    "done_at_s": 36.408090799930505,
+    "record": {
+     "status": 200,
+     "duration_ms": 6898.28,
+     "cpu_ms": 26015.62,
+     "rss_mb": 980.4,
+     "model_queue_ms": 6100.07,
+     "model_compute_ms": 791.63,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 6891.95,
+      "signal_two": 0.82,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 2.07
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-ae9cd4af",
+    "creator": "load_abc6_w0",
+    "status": 503,
+    "retry_after": "7",
+    "client_ms": 25.215800036676228,
+    "sent_at_s": 30.00033720000647,
+    "done_at_s": 30.025926899979822,
+    "record": {
+     "status": 503,
+     "duration_ms": 3.75,
+     "cpu_ms": 0.0,
+     "rss_mb": 948.8,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 0.02
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-c6a5c4a8",
+    "creator": "load_abc6_w1",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 6688.734199968167,
+    "sent_at_s": 30.500101399957202,
+    "done_at_s": 37.18908859998919,
+    "record": {
+     "status": 200,
+     "duration_ms": 6681.13,
+     "cpu_ms": 25359.38,
+     "rss_mb": 980.6,
+     "model_queue_ms": 5894.81,
+     "model_compute_ms": 778.3,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 6673.36,
+      "signal_two": 1.22,
+      "combine": 0.01,
+      "label": 0.01,
+      "audit_write": 3.04
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-e414dc57",
+    "creator": "load_abc6_w2",
+    "status": 503,
+    "retry_after": "7",
+    "client_ms": 19.043500069528818,
+    "sent_at_s": 31.00035999994725,
+    "done_at_s": 31.019616700010374,
+    "record": {
+     "status": 503,
+     "duration_ms": 7.25,
+     "cpu_ms": 78.12,
+     "rss_mb": 985.0,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 0.03
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-9e5374aa",
+    "creator": "load_abc6_w3",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 6490.203500026837,
+    "sent_at_s": 31.50753269996494,
+    "done_at_s": 37.998515099985525,
+    "record": {
+     "status": 200,
+     "duration_ms": 6467.11,
+     "cpu_ms": 25000.0,
+     "rss_mb": 980.6,
+     "model_queue_ms": 5648.72,
+     "model_compute_ms": 812.35,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 6461.29,
+      "signal_two": 0.8,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 1.66
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-405f180e",
+    "creator": "load_abc6_w4",
+    "status": 503,
+    "retry_after": "8",
+    "client_ms": 12.895600055344403,
+    "sent_at_s": 32.00027149997186,
+    "done_at_s": 32.01515130000189,
+    "record": {
+     "status": 503,
+     "duration_ms": 5.1,
+     "cpu_ms": 78.12,
+     "rss_mb": 945.3,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 0.04
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-7db38ad4",
+    "creator": "load_abc6_w5",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 6375.89000002481,
+    "sent_at_s": 32.502360299928114,
+    "done_at_s": 38.87845910002943,
+    "record": {
+     "status": 200,
+     "duration_ms": 6367.78,
+     "cpu_ms": 24781.25,
+     "rss_mb": 981.1,
+     "model_queue_ms": 5482.42,
+     "model_compute_ms": 879.86,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 6362.5,
+      "signal_two": 0.86,
+      "combine": 0.02,
+      "label": 0.0,
+      "audit_write": 1.7
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-7b6e26c2",
+    "creator": "load_abc6_w6",
+    "status": 503,
+    "retry_after": "9",
+    "client_ms": 11.740999994799495,
+    "sent_at_s": 33.00078819994815,
+    "done_at_s": 33.012743999948725,
+    "record": {
+     "status": 503,
+     "duration_ms": 3.8,
+     "cpu_ms": 46.88,
+     "rss_mb": 996.5,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 0.03
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-320f9021",
+    "creator": "load_abc6_w7",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 6166.891200002283,
+    "sent_at_s": 33.5004889999982,
+    "done_at_s": 39.66758140001912,
+    "record": {
+     "status": 200,
+     "duration_ms": 6159.78,
+     "cpu_ms": 23703.12,
+     "rss_mb": 980.6,
+     "model_queue_ms": 5365.15,
+     "model_compute_ms": 788.97,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 6154.37,
+      "signal_two": 0.86,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 1.88
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-cb72b3c5",
+    "creator": "load_abc6_w8",
+    "status": 503,
+    "retry_after": "8",
+    "client_ms": 13.15670006442815,
+    "sent_at_s": 34.000567200011574,
+    "done_at_s": 34.01410119992215,
+    "record": {
+     "status": 503,
+     "duration_ms": 5.11,
+     "cpu_ms": 62.5,
+     "rss_mb": 979.6,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 0.02
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-a4300937",
+    "creator": "load_abc6_w9",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 5977.975599933416,
+    "sent_at_s": 34.500311999931,
+    "done_at_s": 40.47847079997882,
+    "record": {
+     "status": 200,
+     "duration_ms": 5971.39,
+     "cpu_ms": 22859.38,
+     "rss_mb": 980.8,
+     "model_queue_ms": 5154.39,
+     "model_compute_ms": 810.95,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 5965.58,
+      "signal_two": 0.82,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 1.75
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-c81b37d8",
+    "creator": "load_abc6_w0",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 6268.91300000716,
+    "sent_at_s": 35.00039049994666,
+    "done_at_s": 41.26951759995427,
+    "record": {
+     "status": 200,
+     "duration_ms": 6261.54,
+     "cpu_ms": 24109.38,
+     "rss_mb": 980.1,
+     "model_queue_ms": 5466.12,
+     "model_compute_ms": 789.74,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 6256.12,
+      "signal_two": 1.13,
+      "combine": 0.01,
+      "label": 0.0,
+      "audit_write": 1.89
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-7d099226",
+    "creator": "load_abc6_w1",
+    "status": 503,
+    "retry_after": "7",
+    "client_ms": 10.83929999731481,
+    "sent_at_s": 35.50020329991821,
+    "done_at_s": 35.51122500002384,
+    "record": {
+     "status": 503,
+     "duration_ms": 3.34,
+     "cpu_ms": 78.12,
+     "rss_mb": 996.7,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 0.03
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-0129d5d4",
+    "creator": "load_abc6_w2",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 6198.405599920079,
+    "sent_at_s": 36.00049489992671,
+    "done_at_s": 42.19910199998412,
+    "record": {
+     "status": 200,
+     "duration_ms": 6191.41,
+     "cpu_ms": 23703.12,
+     "rss_mb": 1031.8,
+     "model_queue_ms": 5255.82,
+     "model_compute_ms": 929.05,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 6185.12,
+      "signal_two": 1.18,
+      "combine": 0.0,
+      "label": 0.01,
+      "audit_write": 2.36
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-228002a6",
+    "creator": "load_abc6_w3",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 6487.793700071052,
+    "sent_at_s": 36.500440199975856,
+    "done_at_s": 42.98844589991495,
+    "record": {
+     "status": 200,
+     "duration_ms": 6481.41,
+     "cpu_ms": 24921.88,
+     "rss_mb": 980.9,
+     "model_queue_ms": 5684.21,
+     "model_compute_ms": 791.33,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 6475.76,
+      "signal_two": 0.81,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 1.46
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-a4520a01",
+    "creator": "load_abc6_w4",
+    "status": 503,
+    "retry_after": "7",
+    "client_ms": 9.86750004813075,
+    "sent_at_s": 37.00012620002963,
+    "done_at_s": 37.010244700009935,
+    "record": {
+     "status": 503,
+     "duration_ms": 2.88,
+     "cpu_ms": 0.0,
+     "rss_mb": 998.3,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 0.02
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-698fe7d9",
+    "creator": "load_abc6_w5",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 6318.22750007268,
+    "sent_at_s": 37.50027379998937,
+    "done_at_s": 43.81872510001995,
+    "record": {
+     "status": 200,
+     "duration_ms": 6310.86,
+     "cpu_ms": 23984.38,
+     "rss_mb": 979.8,
+     "model_queue_ms": 5475.71,
+     "model_compute_ms": 829.91,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 6305.85,
+      "signal_two": 0.8,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 1.51
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-eb585197",
+    "creator": "load_abc6_w6",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 6969.638499896973,
+    "sent_at_s": 38.000405699945986,
+    "done_at_s": 44.97022829996422,
+    "record": {
+     "status": 200,
+     "duration_ms": 6946.62,
+     "cpu_ms": 25609.38,
+     "rss_mb": 980.3,
+     "model_queue_ms": 5791.06,
+     "model_compute_ms": 1147.5,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 6938.93,
+      "signal_two": 1.26,
+      "combine": 0.01,
+      "label": 0.0,
+      "audit_write": 2.82
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-07ed4278",
+    "creator": "load_abc6_w7",
+    "status": 503,
+    "retry_after": "7",
+    "client_ms": 13.607200002297759,
+    "sent_at_s": 38.50031039991882,
+    "done_at_s": 38.51411540003028,
+    "record": {
+     "status": 503,
+     "duration_ms": 4.42,
+     "cpu_ms": 31.25,
+     "rss_mb": 933.5,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 0.04
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-1c87a745",
+    "creator": "load_abc6_w8",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 6922.794900019653,
+    "sent_at_s": 39.000597600010224,
+    "done_at_s": 45.92362849996425,
+    "record": {
+     "status": 200,
+     "duration_ms": 6915.58,
+     "cpu_ms": 25343.75,
+     "rss_mb": 981.3,
+     "model_queue_ms": 5954.1,
+     "model_compute_ms": 954.41,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 6908.74,
+      "signal_two": 1.0,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 2.45
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-c37bfad2",
+    "creator": "load_abc6_w9",
+    "status": 503,
+    "retry_after": "8",
+    "client_ms": 19.631299888715148,
+    "sent_at_s": 39.500387999927625,
+    "done_at_s": 39.52026759996079,
+    "record": {
+     "status": 503,
+     "duration_ms": 3.27,
+     "cpu_ms": 0.0,
+     "rss_mb": 998.3,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 0.02
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-976134a5",
+    "creator": "load_abc6_w0",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 6986.858099931851,
+    "sent_at_s": 40.000240799970925,
+    "done_at_s": 46.98731110000517,
+    "record": {
+     "status": 200,
+     "duration_ms": 6964.2,
+     "cpu_ms": 25046.88,
+     "rss_mb": 980.1,
+     "model_queue_ms": 5892.69,
+     "model_compute_ms": 1064.35,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 6957.34,
+      "signal_two": 1.15,
+      "combine": 0.01,
+      "label": 0.0,
+      "audit_write": 1.99
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-04c9fd61",
+    "creator": "load_abc6_w1",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 7786.309399991296,
+    "sent_at_s": 40.50046799995471,
+    "done_at_s": 48.28707550000399,
+    "record": {
+     "status": 200,
+     "duration_ms": 7773.14,
+     "cpu_ms": 26656.25,
+     "rss_mb": 978.8,
+     "model_queue_ms": 6468.9,
+     "model_compute_ms": 1287.09,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 7757.06,
+      "signal_two": 1.26,
+      "combine": 0.01,
+      "label": 0.0,
+      "audit_write": 11.12
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-1e8c011e",
+    "creator": "load_abc6_w2",
+    "status": 503,
+    "retry_after": "7",
+    "client_ms": 9.879200020805001,
+    "sent_at_s": 41.00010339997243,
+    "done_at_s": 41.0101743999403,
+    "record": {
+     "status": 503,
+     "duration_ms": 4.13,
+     "cpu_ms": 0.0,
+     "rss_mb": 935.7,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 0.02
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-03e5fb71",
+    "creator": "load_abc6_w3",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 8428.1186000444,
+    "sent_at_s": 41.50023369991686,
+    "done_at_s": 49.92881219997071,
+    "record": {
+     "status": 200,
+     "duration_ms": 8418.72,
+     "cpu_ms": 26484.38,
+     "rss_mb": 979.2,
+     "model_queue_ms": 6756.45,
+     "model_compute_ms": 1655.92,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 8412.7,
+      "signal_two": 0.94,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 1.61
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-31f8e765",
+    "creator": "load_abc6_w4",
+    "status": 503,
+    "retry_after": "7",
+    "client_ms": 10.173300048336387,
+    "sent_at_s": 42.00021770002786,
+    "done_at_s": 42.010557499947026,
+    "record": {
+     "status": 503,
+     "duration_ms": 3.78,
+     "cpu_ms": 0.0,
+     "rss_mb": 984.8,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 0.03
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-60747326",
+    "creator": "load_abc6_w5",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 8249.443899956532,
+    "sent_at_s": 42.500104999984615,
+    "done_at_s": 50.74976629996672,
+    "record": {
+     "status": 200,
+     "duration_ms": 8240.09,
+     "cpu_ms": 25671.88,
+     "rss_mb": 979.9,
+     "model_queue_ms": 7414.77,
+     "model_compute_ms": 818.89,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 8233.91,
+      "signal_two": 0.96,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 1.87
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-4aa26d31",
+    "creator": "load_abc6_w6",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 8642.122599994764,
+    "sent_at_s": 43.00034729996696,
+    "done_at_s": 51.64264719991479,
+    "record": {
+     "status": 200,
+     "duration_ms": 8633.43,
+     "cpu_ms": 27000.0,
+     "rss_mb": 979.8,
+     "model_queue_ms": 7733.12,
+     "model_compute_ms": 894.83,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 8628.18,
+      "signal_two": 0.82,
+      "combine": 0.01,
+      "label": 0.0,
+      "audit_write": 1.76
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-0acab6e1",
+    "creator": "load_abc6_w7",
+    "status": 503,
+    "retry_after": "7",
+    "client_ms": 11.241600033827126,
+    "sent_at_s": 43.500546299968846,
+    "done_at_s": 43.51195790001657,
+    "record": {
+     "status": 503,
+     "duration_ms": 3.64,
+     "cpu_ms": 15.62,
+     "rss_mb": 945.9,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 0.04
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-1869de75",
+    "creator": "load_abc6_w8",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 8558.357800007798,
+    "sent_at_s": 44.00062199996319,
+    "done_at_s": 52.55922119994648,
+    "record": {
+     "status": 200,
+     "duration_ms": 8545.88,
+     "cpu_ms": 26531.25,
+     "rss_mb": 979.9,
+     "model_queue_ms": 7623.44,
+     "model_compute_ms": 915.5,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 8539.19,
+      "signal_two": 0.84,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 2.43
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-bbe92f6c",
+    "creator": "load_abc6_w9",
+    "status": 503,
+    "retry_after": "7",
+    "client_ms": 19.61200009100139,
+    "sent_at_s": 44.50241059996188,
+    "done_at_s": 44.52229430002626,
+    "record": {
+     "status": 503,
+     "duration_ms": 5.24,
+     "cpu_ms": 0.0,
+     "rss_mb": 942.3,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 0.03
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-14983b6e",
+    "creator": "load_abc6_w0",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 8444.66439995449,
+    "sent_at_s": 45.00014489993919,
+    "done_at_s": 53.44520840002224,
+    "record": {
+     "status": 200,
+     "duration_ms": 8435.73,
+     "cpu_ms": 26968.75,
+     "rss_mb": 1031.0,
+     "model_queue_ms": 7542.33,
+     "model_compute_ms": 888.24,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 8430.77,
+      "signal_two": 0.79,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 1.29
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-73e66dd9",
+    "creator": "load_abc6_w1",
+    "status": 503,
+    "retry_after": "10",
+    "client_ms": 13.706000056117773,
+    "sent_at_s": 45.5004022999201,
+    "done_at_s": 45.514292799984105,
+    "record": {
+     "status": 503,
+     "duration_ms": 5.76,
+     "cpu_ms": 46.88,
+     "rss_mb": 933.4,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 0.03
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-487e9cb7",
+    "creator": "load_abc6_w2",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 8314.578699995764,
+    "sent_at_s": 46.0004092999734,
+    "done_at_s": 54.315239800023846,
+    "record": {
+     "status": 200,
+     "duration_ms": 8291.52,
+     "cpu_ms": 26281.25,
+     "rss_mb": 980.6,
+     "model_queue_ms": 7416.29,
+     "model_compute_ms": 868.88,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 8285.43,
+      "signal_two": 0.84,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 1.86
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-bcd3b012",
+    "creator": "load_abc6_w3",
+    "status": 503,
+    "retry_after": "8",
+    "client_ms": 18.95120006520301,
+    "sent_at_s": 46.50057139992714,
+    "done_at_s": 46.520224799984135,
+    "record": {
+     "status": 503,
+     "duration_ms": 4.92,
+     "cpu_ms": 46.88,
+     "rss_mb": 932.7,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 0.03
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-58ff26f6",
+    "creator": "load_abc6_w4",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 8117.11250001099,
+    "sent_at_s": 47.00057439994998,
+    "done_at_s": 55.11789290001616,
+    "record": {
+     "status": 200,
+     "duration_ms": 8108.61,
+     "cpu_ms": 26046.88,
+     "rss_mb": 981.6,
+     "model_queue_ms": 7300.34,
+     "model_compute_ms": 800.61,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 8101.25,
+      "signal_two": 1.14,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 1.99
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-10abc570",
+    "creator": "load_abc6_w5",
+    "status": 503,
+    "retry_after": "9",
+    "client_ms": 18.323800060898066,
+    "sent_at_s": 47.500115099945106,
+    "done_at_s": 47.51867060002405,
+    "record": {
+     "status": 503,
+     "duration_ms": 4.96,
+     "cpu_ms": 0.0,
+     "rss_mb": 928.5,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 0.03
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-d66dbba3",
+    "creator": "load_abc6_w6",
+    "status": 503,
+    "retry_after": "9",
+    "client_ms": 248.95829998422414,
+    "sent_at_s": 48.016617299988866,
+    "done_at_s": 48.26617149997037,
+    "record": {
+     "status": 503,
+     "duration_ms": 179.29,
+     "cpu_ms": 343.75,
+     "rss_mb": 984.9,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.02,
+      "signal_one": 0.13
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-38ca0e3e",
+    "creator": "load_abc6_w7",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 7380.760599975474,
+    "sent_at_s": 48.56803450000007,
+    "done_at_s": 55.94911119993776,
+    "record": {
+     "status": 200,
+     "duration_ms": 7359.28,
+     "cpu_ms": 25640.62,
+     "rss_mb": 1031.6,
+     "model_queue_ms": 6515.22,
+     "model_compute_ms": 833.11,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 7348.57,
+      "signal_two": 0.78,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 1.62
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-a727e3eb",
+    "creator": "load_abc6_w8",
+    "status": 503,
+    "retry_after": "11",
+    "client_ms": 15.440099989064038,
+    "sent_at_s": 49.000384800019674,
+    "done_at_s": 49.016067899996415,
+    "record": {
+     "status": 503,
+     "duration_ms": 5.93,
+     "cpu_ms": 46.88,
+     "rss_mb": 983.5,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 0.03
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-7c58ca7c",
+    "creator": "load_abc6_w9",
+    "status": 503,
+    "retry_after": "11",
+    "client_ms": 17.96760002616793,
+    "sent_at_s": 49.50019880000036,
+    "done_at_s": 49.518375499988906,
+    "record": {
+     "status": 503,
+     "duration_ms": 5.53,
+     "cpu_ms": 31.25,
+     "rss_mb": 934.4,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 0.04
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-0e89a273",
+    "creator": "load_abc6_w0",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 6719.319100026041,
+    "sent_at_s": 50.00055140000768,
+    "done_at_s": 56.72008989995811,
+    "record": {
+     "status": 200,
+     "duration_ms": 6702.92,
+     "cpu_ms": 24890.62,
+     "rss_mb": 981.1,
+     "model_queue_ms": 5926.86,
+     "model_compute_ms": 771.61,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 6698.68,
+      "signal_two": 0.8,
+      "combine": 0.04,
+      "label": 0.0,
+      "audit_write": 1.42
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-b9c7d989",
+    "creator": "load_abc6_w1",
+    "status": 503,
+    "retry_after": "14",
+    "client_ms": 16.082399990409613,
+    "sent_at_s": 50.500688900006935,
+    "done_at_s": 50.517035000026226,
+    "record": {
+     "status": 503,
+     "duration_ms": 7.6,
+     "cpu_ms": 46.88,
+     "rss_mb": 986.2,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 0.05
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-b5cdae22",
+    "creator": "load_abc6_w2",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 6508.2052000798285,
+    "sent_at_s": 51.000604199944064,
+    "done_at_s": 57.50927939999383,
+    "record": {
+     "status": 200,
+     "duration_ms": 6501.32,
+     "cpu_ms": 24500.0,
+     "rss_mb": 980.9,
+     "model_queue_ms": 5706.29,
+     "model_compute_ms": 787.85,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 6494.35,
+      "signal_two": 0.98,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 2.83
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-a981ba4b",
+    "creator": "load_abc6_w3",
+    "status": 503,
+    "retry_after": "7",
+    "client_ms": 27.84379990771413,
+    "sent_at_s": 51.500467099947855,
+    "done_at_s": 51.528500900021754,
+    "record": {
+     "status": 503,
+     "duration_ms": 3.9,
+     "cpu_ms": 78.12,
+     "rss_mb": 998.2,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 0.03
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-96ca9207",
+    "creator": "load_abc6_w4",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 6291.29050008487,
+    "sent_at_s": 52.000469899969175,
+    "done_at_s": 58.292150799999945,
+    "record": {
+     "status": 200,
+     "duration_ms": 6282.89,
+     "cpu_ms": 23796.88,
+     "rss_mb": 980.7,
+     "model_queue_ms": 5492.89,
+     "model_compute_ms": 783.54,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 6276.67,
+      "signal_two": 0.83,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 1.56
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-7a750a7b",
+    "creator": "load_abc6_w5",
+    "status": 503,
+    "retry_after": "8",
+    "client_ms": 11.794199934229255,
+    "sent_at_s": 52.50034919998143,
+    "done_at_s": 52.512325900024734,
+    "record": {
+     "status": 503,
+     "duration_ms": 5.41,
+     "cpu_ms": 62.5,
+     "rss_mb": 984.8,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 0.03
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-b8bf4141",
+    "creator": "load_abc6_w6",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 6092.88660006132,
+    "sent_at_s": 53.000258199987,
+    "done_at_s": 59.09334209992085,
+    "record": {
+     "status": 200,
+     "duration_ms": 6085.34,
+     "cpu_ms": 23281.25,
+     "rss_mb": 979.2,
+     "model_queue_ms": 5279.12,
+     "model_compute_ms": 800.41,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 6079.82,
+      "signal_two": 0.89,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 1.94
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-7811d74e",
+    "creator": "load_abc6_w7",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 6387.99689989537,
+    "sent_at_s": 53.500960399978794,
+    "done_at_s": 59.88927129993681,
+    "record": {
+     "status": 200,
+     "duration_ms": 6380.92,
+     "cpu_ms": 24484.38,
+     "rss_mb": 980.5,
+     "model_queue_ms": 5578.76,
+     "model_compute_ms": 796.02,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 6375.02,
+      "signal_two": 1.0,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 2.15
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-f04677bc",
+    "creator": "load_abc6_w8",
+    "status": 503,
+    "retry_after": "8",
+    "client_ms": 10.42040006723255,
+    "sent_at_s": 54.00030349998269,
+    "done_at_s": 54.01094039995223,
+    "record": {
+     "status": 503,
+     "duration_ms": 4.1,
+     "cpu_ms": 0.0,
+     "rss_mb": 945.4,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 0.02
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-f3363c20",
+    "creator": "load_abc6_w9",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 6133.843399933539,
+    "sent_at_s": 54.500177999958396,
+    "done_at_s": 60.63424970000051,
+    "record": {
+     "status": 200,
+     "duration_ms": 6105.91,
+     "cpu_ms": 23781.25,
+     "rss_mb": 1032.7,
+     "model_queue_ms": 5353.27,
+     "model_compute_ms": 745.39,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 6099.27,
+      "signal_two": 0.8,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 2.07
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-456661be",
+    "creator": "load_abc6_w0",
+    "status": 503,
+    "retry_after": "7",
+    "client_ms": 31.355599989183247,
+    "sent_at_s": 55.00039810000453,
+    "done_at_s": 55.031948899966665,
+    "record": {
+     "status": 503,
+     "duration_ms": 3.57,
+     "cpu_ms": 15.62,
+     "rss_mb": 999.5,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 0.02
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-123f9f2a",
+    "creator": "load_abc6_w1",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 5888.047500047833,
+    "sent_at_s": 55.50017259991728,
+    "done_at_s": 61.38838739995845,
+    "record": {
+     "status": 200,
+     "duration_ms": 5880.32,
+     "cpu_ms": 23234.38,
+     "rss_mb": 980.0,
+     "model_queue_ms": 5120.89,
+     "model_compute_ms": 754.78,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 5875.87,
+      "signal_two": 0.81,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 1.41
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-7cc5e215",
+    "creator": "load_abc6_w2",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 6116.085199988447,
+    "sent_at_s": 56.00052879995201,
+    "done_at_s": 62.117052700021304,
+    "record": {
+     "status": 200,
+     "duration_ms": 6106.69,
+     "cpu_ms": 24078.12,
+     "rss_mb": 980.4,
+     "model_queue_ms": 5375.37,
+     "model_compute_ms": 725.31,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 6101.15,
+      "signal_two": 0.8,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 1.49
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-25066e95",
+    "creator": "load_abc6_w3",
+    "status": 503,
+    "retry_after": "7",
+    "client_ms": 12.32710003387183,
+    "sent_at_s": 56.50035599991679,
+    "done_at_s": 56.512882599956356,
+    "record": {
+     "status": 503,
+     "duration_ms": 4.92,
+     "cpu_ms": 46.88,
+     "rss_mb": 999.4,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 0.04
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-d01fb680",
+    "creator": "load_abc6_w4",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 5888.26220005285,
+    "sent_at_s": 57.00028239993844,
+    "done_at_s": 62.88890769996215,
+    "record": {
+     "status": 200,
+     "duration_ms": 5881.34,
+     "cpu_ms": 23296.88,
+     "rss_mb": 981.0,
+     "model_queue_ms": 5100.29,
+     "model_compute_ms": 774.63,
+     "stages_ms": {
+      "validate": 0.01,
+      "signal_one": 5875.17,
+      "signal_two": 0.77,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 1.31
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-0e5e4a5c",
+    "creator": "load_abc6_w5",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 6151.217200094834,
+    "sent_at_s": 57.50023819995113,
+    "done_at_s": 63.65160550002474,
+    "record": {
+     "status": 200,
+     "duration_ms": 6143.9,
+     "cpu_ms": 24281.25,
+     "rss_mb": 980.1,
+     "model_queue_ms": 5376.02,
+     "model_compute_ms": 762.41,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 6138.67,
+      "signal_two": 0.87,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 1.99
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-90b08b34",
+    "creator": "load_abc6_w6",
+    "status": 503,
+    "retry_after": "7",
+    "client_ms": 9.263899992220104,
+    "sent_at_s": 58.00069589994382,
+    "done_at_s": 58.01017060002778,
+    "record": {
+     "status": 503,
+     "duration_ms": 3.22,
+     "cpu_ms": 0.0,
+     "rss_mb": 946.2,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 0.02
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-e3edb44c",
+    "creator": "load_abc6_w7",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 6036.771100014448,
+    "sent_at_s": 58.50049150001723,
+    "done_at_s": 64.5375240999274,
+    "record": {
+     "status": 200,
+     "duration_ms": 6030.05,
+     "cpu_ms": 23703.12,
+     "rss_mb": 979.3,
+     "model_queue_ms": 5138.76,
+     "model_compute_ms": 885.83,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 6024.83,
+      "signal_two": 0.8,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 1.31
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-417cf78d",
+    "creator": "load_abc6_w8",
+    "status": 503,
+    "retry_after": "7",
+    "client_ms": 8.313000085763633,
+    "sent_at_s": 59.000494099920616,
+    "done_at_s": 59.00898799998686,
+    "record": {
+     "status": 503,
+     "duration_ms": 2.91,
+     "cpu_ms": 0.0,
+     "rss_mb": 984.7,
+     "model_queue_ms": null,
+     "model_compute_ms": null,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 0.02
+     }
+    }
+   },
+   {
+    "request_id": "load-10x-5d53e48b",
+    "creator": "load_abc6_w9",
+    "status": 200,
+    "retry_after": null,
+    "client_ms": 5856.255399994552,
+    "sent_at_s": 59.50050319998991,
+    "done_at_s": 65.35702889994718,
+    "record": {
+     "status": 200,
+     "duration_ms": 5850.86,
+     "cpu_ms": 22921.88,
+     "rss_mb": 978.5,
+     "model_queue_ms": 5023.64,
+     "model_compute_ms": 821.6,
+     "stages_ms": {
+      "validate": 0.0,
+      "signal_one": 5845.38,
+      "signal_two": 1.03,
+      "combine": 0.0,
+      "label": 0.0,
+      "audit_write": 0.98
+     }
+    }
+   }
+  ]
+ }
+}
