@@ -1,0 +1,13 @@
+Trial 2 — 2026-11-13 14:42:07
+Phase A: fresh serve.py (C3, C4, C5, C1)
+  C3  mean CPU 3.22 s, mean wall 0.885 s
+  C4  run 1 0.812 s = 1.02× median
+  C5  peak 983.4 MB, creep -1.1 MB
+  C1  60/60 logged once, 0 missing, 0 dup, 3×429, status codes {'200': 46, '400': 10, '404': 1, '429': 3}
+Phase B: deliberate failures (C2)
+  C2a PASS  {"client_status": 500, "client_content_type": "text/html; charset=utf-8", "client_s": 0.81, "records": 1, "outcome": "error", "exception_type": "InjectedFault", "exception_message": "injected fault in stage 'signal_two' (AI201_INJECT_FAULT)", "failed_stage": "signal_two"}
+  C2b PASS  {"client_status": 500, "client_content_type": "text/html; charset=utf-8", "client_s": 7.28, "records": 1, "outcome": "error", "exception_type": "InjectedFault", "exception_message": "injected fault in stage 'signal_two' (AI201_INJECT_FAULT)", "failed_stage": "signal_two"}
+  C2c PASS  {"client_status": 503, "client_content_type": "application/json", "client_s": 6.54, "records": 1, "outcome": "error", "exception_type": "DetectorUnavailable", "exception_message": "Couldn't load 'provenance-guard/no-such-model-xyz': provenance-guard/no-such-model-xyz is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'\nIf this is a private repository, make sure to pass a token having permission to this repo either by logging in with `hf auth login` or by passing `token=<your_token>`\nThe first run downloads about 550 MB \u2014 check your connection and that you have disk space free.", "failed_stage": "signal_one"}
+  C2d PASS  {"exited": true, "exit_code": 1, "seconds_to_exit": 7.53, "port_ever_open": false, "startup_error_records": 1, "exception_type": "DetectorUnavailable"}
+Verdicts this trial: C1 pass, C2 pass, C3 pass, C4 pass, C5 pass
+Wrote results/ext_eval/after2/trial2_result_2026-11-13_144207.json

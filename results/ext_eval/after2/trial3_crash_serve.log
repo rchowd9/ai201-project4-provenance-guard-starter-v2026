@@ -1,0 +1,42 @@
+Loading gpt2 before opening the port…
+`loss_type=None` was set in the config but it is unrecognized. Using the default loss: `ForCausalLMLoss`.
+Provenance Guard (served) on http://127.0.0.1:5102
+  detector model:   gpt2
+  model load:       6.95 s (before the port opened)
+  first gpt2 pass:  0.22 s (torch setup, paid at startup)
+  resident memory:  891.5 MB  (free-tier budget 512 MB, OVER by 380 MB)
+  rate limiting:    ON  (12/min, 250/day)
+  audit log:        C:\Users\Home\Downloads\Prov\ai201-project4-provenance-guard-starter-v2026\logs\audit.jsonl
+  request log:      C:\Users\Home\Downloads\Prov\ai201-project4-provenance-guard-starter-v2026\logs\requests.jsonl
+  live metrics:     http://127.0.0.1:5102/metrics
+
+server: Flask threaded, debug off (gunicorn doesn't run on Windows; `pip install waitress` for a real one)
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on http://127.0.0.1:5102
+Press CTRL+C to quit
+127.0.0.1 - - [13/Nov/2026 14:44:48] "GET /health HTTP/1.1" 200 -
+[2026-11-13 14:44:48,868] ERROR in app: Exception on /submit [POST]
+Traceback (most recent call last):
+  File "C:\Users\Home\Downloads\Prov\ai201-project4-provenance-guard-starter-v2026\.venv\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Home\Downloads\Prov\ai201-project4-provenance-guard-starter-v2026\.venv\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Home\Downloads\Prov\ai201-project4-provenance-guard-starter-v2026\.venv\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Home\Downloads\Prov\ai201-project4-provenance-guard-starter-v2026\.venv\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Home\Downloads\Prov\ai201-project4-provenance-guard-starter-v2026\.venv\Lib\site-packages\flask_limiter\extension.py", line 1314, in __inner
+    return cast(R, flask.current_app.ensure_sync(obj)(*a, **k))
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Home\Downloads\Prov\ai201-project4-provenance-guard-starter-v2026\app.py", line 263, in submit
+    with instrumentation.stage("signal_two"):
+         ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Users\Home\AppData\Local\Programs\Python\Python313\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "C:\Users\Home\Downloads\Prov\ai201-project4-provenance-guard-starter-v2026\instrumentation.py", line 177, in stage
+    raise InjectedFault(f"injected fault in stage '{name}' (AI201_INJECT_FAULT)")
+instrumentation.InjectedFault: injected fault in stage 'signal_two' (AI201_INJECT_FAULT)
+127.0.0.1 - - [13/Nov/2026 14:44:48] "POST /submit HTTP/1.1" 500 -

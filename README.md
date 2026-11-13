@@ -1788,6 +1788,93 @@ requests wait for it, and the median writer waited 105 s (max 197 s) for a
 - **The trade I expect to pay:** some writers in a burst get turned away
   ("busy, try again in N s") who today would eventually get an answer.
 
+#### What I changed
+
+One thing: the cap. `detector.py::perplexity` counts passes waiting or running
+under a lock. If `DETECTOR_QUEUE_CAP` (8) are already in, it raises
+`DetectorBusy` before joining the queue. `app.py` turns that into a JSON `503`
+with `Retry-After` (queue length × the last pass time, rounded up), plus a
+run-log record (exception, queue depth) and an audit rejection
+`detector_busy`. Scoring, thresholds, server and harness are unchanged.
+
+#### Before and after — 3 trials each, 10× load
+
+On 2026-11-13, trials alternated before, after, before, after, before, after,
+each on a fresh `serve.py`, so the machine's speed that day hit both sides
+equally. Before = `AI201_QUEUE_CAP=0`, after = 8. Each trial sent 120
+submissions at 2/s from 10 writers. Files: `results/stretch/before_trial{1,2,3}_*.json`
+and `results/stretch/after_trial{1,2,3}_*.json`.
+
+The laptop was fast that day: a gpt2 pass averaged about 0.9 s (2.1 s on
+11-12), so the service could finish about 1.1 runs/s, and 10× was about 1.8×
+what it could handle rather than 4.3×. The queue grew more slowly than in the
+load observation, but it still grew all the way through.
+
+| | Before: Run 1 / 2 / 3 | After: Run 1 / 2 / 3 |
+|---|---|---|
+| Answered `200` | 120 / 120 / 120 | 74 / 75 / 73 |
+| Refused `503` busy | 0 / 0 / 0 | 46 / 45 / 47 |
+| Latency of `200`s, p50 | 33.3 / 23.0 / 29.1 s | **6.7 / 6.8 / 6.5 s** |
+| Latency of `200`s, p95 | 60.1 / 44.1 / 51.9 s | **7.7 / 7.8 / 8.5 s** |
+| Latency of `200`s, max | 62.3 / 46.6 / 54.3 s | 8.1 / 8.2 / 8.6 s |
+| Mean latency, 1st / 2nd / 3rd of the phase (run 1) | 11.9 / 33.6 / 54.6 s | 5.3 / 6.6 / 6.9 s |
+| Waiting for the model thread, mean | 32.3 / 22.1 / 27.8 s | 5.4 / 5.3 / 5.4 s |
+| gpt2 compute, mean | 1.01 / 0.88 / 0.95 s | 0.90 / 0.89 / 0.90 s |
+| `503` answered in, p50 / max | — | 12 / 46 ms, 13 / 37 ms, 15 / 249 ms |
+| `503`s with `Retry-After` / with a run-log record | — | 46/46, 45/45, 47/47 |
+| `Retry-After` given | — | 6–10 s, 7–10 s, 7–14 s |
+| Completed throughput | 0.99 / 1.13 / 1.05 runs/s | 1.11 / 1.12 / 1.12 runs/s |
+| Last answer arrived at | 121.8 / 106.2 / 113.8 s | 66.4 / 66.8 / 65.4 s |
+| Peak RSS | 1,030 / 1,032 / 1,032 MB | 1,032 / 1,032 / 1,033 MB |
+
+The audit log has exactly **138** `detector_busy` rejections, which is
+46 + 45 + 47, so every refusal was recorded in both logs.
+
+**Against the targets I set before starting:**
+
+| Target | After: Run 1 / 2 / 3 | Verdict |
+|---|---|---|
+| p95 of accepted requests ≤ 30 s | 7.7 / 7.8 / 8.5 s | **MET** (3 of 3) |
+| Every `503` in ≤ 1 s, with `Retry-After` and a log record | max 0.05 / 0.04 / 0.25 s; 138/138 with header and record | **MET** (3 of 3) |
+| Throughput ≥ 90% of before's mean (1.06 runs/s) | 1.11 / 1.12 / 1.12, which is 105–106% | **MET** (3 of 3) |
+
+**Regression check** (`run_extension_eval.py --label after2`, 3 trials,
+`results/ext_eval_after2_2026-11-13_1445.md`): **all five extension
+criteria still MET in 3 of 3 trials**. That's 60/60 records; failures
+answered (503 in 7.47 / 6.54 / 5.57 s); CPU 3.22–3.23 s and wall
+0.87–0.97 s per run; first request 1.24× / 1.02× / 0.80× the median; and peak
+983–986 MB with −1 MB creep. Those criteria send traffic one request at a
+time, so the cap never triggers there, which is what I wanted: it only
+changes behaviour under a burst.
+
+#### Did it help?
+
+**Yes, for the people who got in.** The p95 wait for an accepted submission
+fell from 44–60 s to 7.7–8.5 s, about **6–8× shorter** in each trial pair, and it stayed flat
+through the phase instead of climbing (5.3 → 6.9 s against 11.9 → 54.6 s).
+The model did the same work, slightly more of it: 1.12 runs/s against 1.06.
+That's because time now goes on passes people are still waiting for, not on
+a growing backlog.
+
+**The trade, measured: 38% of the burst was turned away.** 138 of 360
+submissions got "busy, try again in about 7–14 s" in about 15 ms instead of a
+`200` up to a minute later. Those writers pay. They have to resubmit, and if
+they do it while the burst is still going they may be refused again. Before,
+all 120 eventually got an answer, but at up to 62 s on a fast day and 197 s
+on a slow one, past the point where a browser gives up. I think a fast,
+honest "busy" beats a long silent wait that ends in a timeout. That choice
+means some writers get refused who would otherwise have been served late.
+
+**What I didn't measure, and the cap's known weakness:**
+
+- I didn't test whether a writer who honours `Retry-After` gets in on the
+  second try. The harness doesn't resend.
+- The cap counts submissions, not seconds. At 0.9 s a pass, 8 ahead is about
+  8 s. On the 11-12 slow day (2.1 s a pass) the same cap would mean about
+  19 s, still under 30 s, but a much slower machine would stretch it further.
+  A cap based on expected wait (queue × recent pass time ≤ 20 s) would hold
+  the promise on any machine. That's the next change I'd make.
+
 ### How I Used AI
 
 **Moment 1 (capstone write-up)**
